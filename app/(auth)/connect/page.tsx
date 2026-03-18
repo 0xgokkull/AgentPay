@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Wallet, ShieldAlert, Network } from "lucide-react";
+import Link from "next/link";
+import { Wallet, ShieldAlert, Network, ArrowLeft } from "lucide-react";
 import { useAppStore } from "@/state/useAppStore";
 import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
 
@@ -9,62 +10,90 @@ export default function ConnectPage() {
   const { wallet } = useAppStore();
 
   return (
-    <main className="flex min-h-screen flex-col">
-      <div className="page-grid">
-        <div className="section-card flex flex-col gap-6 bg-slate-950/80 md:flex-row md:items-center">
-          <div className="flex-1 space-y-4">
-            <p className="pill">Step 1 · Connect wallet</p>
-            <h1 className="text-xl font-semibold tracking-tight text-slate-50 md:text-2xl">
-              Connect to Polkadot Hub and prepare your agent vault.
-            </h1>
-            <p className="max-w-xl text-sm leading-relaxed text-slate-300">
-              AgentPay requires a Polkadot-compatible wallet. We validate you are
-              on the Hub network before letting your agents register and move
-              funds.
-            </p>
-            <div className="space-y-2 text-xs text-slate-300">
-              <div className="flex items-center gap-2">
-                <Network className="h-3.5 w-3.5 text-cyan-300" />
-                <span>Expected network: Polkadot Hub</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <ShieldAlert className="h-3.5 w-3.5 text-amber-300" />
-                <span>No signing yet — this step is read-only.</span>
-              </div>
-            </div>
+    <div className="site-container flex flex-1 flex-col py-10 sm:py-16">
+      <Link
+        href="/"
+        className="mb-8 inline-flex w-fit items-center gap-2 text-sm font-medium text-slate-400 transition hover:text-white"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to home
+      </Link>
+
+      <div className="mx-auto grid w-full max-w-5xl gap-10 lg:grid-cols-2 lg:gap-14 lg:items-center">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          className="space-y-6"
+        >
+          <p className="section-eyebrow">Onboarding</p>
+          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            Connect your wallet
+          </h1>
+          <p className="text-base leading-relaxed text-slate-400">
+            We&apos;ll validate your network before you register an agent or move funds. This step
+            is read-only until you approve in your wallet.
+          </p>
+          <ul className="space-y-4 text-sm text-slate-300">
+            <li className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
+                <Network className="h-4 w-4" />
+              </span>
+              <span>
+                <strong className="text-white">Expected network:</strong> Polkadot Hub (or your
+                configured chain).
+              </span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
+                <ShieldAlert className="h-4 w-4" />
+              </span>
+              <span>
+                <strong className="text-white">No transactions yet</strong> — connect only
+                establishes your session.
+              </span>
+            </li>
+          </ul>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, delay: 0.08 }}
+          className="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-8 shadow-xl shadow-black/20 backdrop-blur-sm sm:p-10"
+        >
+          <div className="flex items-center justify-between border-b border-slate-800 pb-6">
+            <span className="flex items-center gap-3 text-sm font-medium text-white">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-400">
+                <Wallet className="h-5 w-5" />
+              </span>
+              Wallet
+            </span>
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                wallet.connected
+                  ? "bg-emerald-500/15 text-emerald-400"
+                  : "bg-slate-800 text-slate-400"
+              }`}
+            >
+              {wallet.connected ? "Connected" : "Not connected"}
+            </span>
           </div>
-
-          <motion.div
-            className="flex-1"
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-          >
-            <div className="section-card glass-panel space-y-4 bg-slate-900/80">
-              <div className="flex items-center justify-between text-xs text-slate-300">
-                <span className="inline-flex items-center gap-2">
-                  <Wallet className="h-4 w-4 text-cyan-300" />
-                  Wallet connection
-                </span>
-                <span className="text-[11px] text-slate-400">
-                  {wallet.connected ? "Connected" : "Not connected"}
-                </span>
-              </div>
-
-              <div className="mt-1">
-                <ConnectWalletButton />
-              </div>
-
-              <p className="text-[11px] leading-relaxed text-slate-400">
-                This is a UX shell only — we&apos;ll wire this button to your
-                preferred Polkadot wallet extension or signer when connecting to
-                real contracts.
-              </p>
-            </div>
-          </motion.div>
-        </div>
+          <div className="pt-8">
+            <ConnectWalletButton />
+            <p className="mt-6 text-xs leading-relaxed text-slate-500">
+              Uses wagmi-compatible wallets (e.g. MetaMask). After connecting, continue to the app
+              to register your agent.
+            </p>
+            <Link
+              href="/dashboard"
+              className="mt-8 inline-flex w-full items-center justify-center rounded-xl border border-slate-600 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/50"
+            >
+              Continue to dashboard
+            </Link>
+          </div>
+        </motion.div>
       </div>
-    </main>
+    </div>
   );
 }
-
