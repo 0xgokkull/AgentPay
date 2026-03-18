@@ -4,69 +4,66 @@ const FEATURES = [
   {
     icon: ShieldCheck,
     label: "Policy enforcement",
-    title: "Guardrails baked into every payment",
-    body: "Define fine-grained spending rules, whitelists, and emergency stops so your agents can move fast without ever going rogue.",
+    title: "Guardrails on every payment",
+    body: "Whitelists, caps, emergency pause—your agents move fast within rules you define.",
+    className: "sm:col-span-2 lg:col-span-2",
   },
   {
     icon: Vault,
     label: "Agent vaults",
-    title: "Yield-aware agent-native treasuries",
-    body: "Manage a single cross-chain vault per agent with ERC4626-style deposits, withdrawals, and transparent yield tracking.",
+    title: "One treasury per agent",
+    body: "Deposits, withdrawals, and yield in one place—ERC-4626-style clarity.",
+    className: "sm:col-span-1",
   },
   {
     icon: Workflow,
     label: "Deterministic flows",
-    title: "Pre-simulated, XCM-first routing",
-    body: "Preview routes, splits, and fees before committing on-chain, with end-to-end visibility from intent to receipt.",
+    title: "Simulate before you sign",
+    body: "See splits, routes, and fees before anything hits the chain.",
+    className: "sm:col-span-1",
   },
   {
     icon: Sparkles,
-    label: "Receipts as NFTs",
-    title: "Every payment leaves a story",
-    body: "Mint an auditable NFT for each executed payment, capturing who paid, how it was split, and which agent approved it.",
+    label: "Receipt NFTs",
+    title: "Proof that sticks",
+    body: "Every payment mints an auditable receipt NFT—who, how much, how it split.",
+    className: "sm:col-span-2 lg:col-span-2",
   },
 ];
 
 export function LandingFeatures() {
   return (
-    <section className="page-grid pt-0">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="pill mb-3">Why builders use AgentPay</p>
-          <h2 className="text-sm font-medium tracking-tight text-slate-50 md:text-base">
-            Agent-centric UX across the entire treasury surface.
+    <section id="product" className="scroll-mt-24 py-16 sm:py-24">
+      <div className="site-container">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="section-eyebrow">Product</p>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            Everything an agent needs to spend responsibly
           </h2>
+          <p className="mt-4 text-base text-slate-400">
+            One surface from identity to receipt—no duct-tape between wallets, spreadsheets, and
+            explorers.
+          </p>
         </div>
-        <p className="hidden max-w-sm text-xs text-slate-400 md:block">
-          From wallet connection to receipt NFTs, every surface is designed around
-          how you actually operate agents: observe, simulate, enforce, then pay.
-        </p>
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {FEATURES.map((feature) => (
-          <article
-            key={feature.title}
-            className="section-card group flex flex-col justify-between bg-slate-950/70 transition hover:-translate-y-1 hover:border-cyan-500/50 hover:bg-slate-950/90"
-          >
-            <div className="mb-4 flex items-center justify-between text-[11px] text-slate-400">
-              <span className="inline-flex items-center gap-2">
-                <feature.icon className="h-3.5 w-3.5 text-cyan-300" />
-                {feature.label}
-              </span>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium tracking-tight text-slate-50">
-                {feature.title}
-              </h3>
-              <p className="text-xs leading-relaxed text-slate-400">
-                {feature.body}
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+          {FEATURES.map((f) => (
+            <article
+              key={f.title}
+              className={`group rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 transition hover:border-cyan-500/30 hover:bg-slate-900/70 hover:shadow-lg hover:shadow-cyan-500/5 lg:p-8 ${f.className}`}
+            >
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 transition group-hover:bg-cyan-500/15">
+                <f.icon className="h-5 w-5" strokeWidth={1.75} />
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-cyan-500/80">
+                {f.label}
               </p>
-            </div>
-          </article>
-        ))}
+              <h3 className="mt-2 text-xl font-semibold text-white">{f.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-400">{f.body}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
-
