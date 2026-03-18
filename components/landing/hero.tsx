@@ -2,127 +2,126 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ShieldCheck, WalletCards } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
+
+const TRUST = [
+  "Pre-tx split simulation",
+  "Policy-gated payouts",
+  "NFT receipts per payment",
+];
 
 export function LandingHero() {
   return (
-    <section className="glass-panel relative overflow-hidden px-6 py-8 md:px-10 md:py-12">
-      <motion.div
-        className="pointer-events-none absolute -left-32 top-10 h-64 w-64 rounded-full bg-cyan-500/15 blur-3xl"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.9, ease: "easeOut" }}
-      />
-      <motion.div
-        className="pointer-events-none absolute -right-40 bottom-0 h-72 w-72 rounded-full bg-sky-500/10 blur-3xl"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: "easeOut", delay: 0.1 }}
-      />
+    <section className="relative overflow-hidden pt-10 pb-16 sm:pt-14 sm:pb-24 lg:pt-16 lg:pb-28">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute left-1/2 top-0 h-[480px] w-[min(100%,800px)] -translate-x-1/2 rounded-full bg-cyan-500/15 blur-[100px]" />
+        <div className="absolute bottom-0 right-0 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl" />
+      </div>
 
-      <div className="relative flex flex-col gap-8 md:flex-row md:items-center">
-        <motion.div
-          className="flex-1 space-y-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        >
-          <div className="pill">
-            <ShieldCheck className="h-3.5 w-3.5 text-cyan-400" />
-            <span>Deterministic agent-native treasury</span>
-          </div>
+      <div className="site-container">
+        <div className="mx-auto max-w-4xl text-center">
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="section-eyebrow"
+          >
+            Agent-native treasury
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.05 }}
+            className="mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl lg:leading-[1.06]"
+          >
+            Pay and treasury{" "}
+            <span className="bg-gradient-to-r from-cyan-300 via-cyan-400 to-sky-400 bg-clip-text text-transparent">
+              built for agents
+            </span>
+            —not multisigs.
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.1 }}
+            className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-400 sm:text-lg"
+          >
+            Register an AI agent, fund a vault, set spending rules, and execute payments with
+            simulated splits and on-chain receipts—on Polkadot Hub.
+          </motion.p>
 
-          <div className="space-y-4">
-            <h1 className="bg-gradient-to-br from-slate-50 via-cyan-100 to-sky-300 bg-clip-text text-3xl font-semibold tracking-tight text-transparent md:text-4xl lg:text-5xl">
-              Pay like an agent,
-              <br />
-              <span className="text-cyan-300">not a multisig.</span>
-            </h1>
-            <p className="max-w-xl text-sm leading-relaxed text-slate-300 md:text-base">
-              AgentPay turns your AI agents into first-class treasurers on Polkadot
-              Hub. Register an agent, set spending policies, route yield across
-              chains, and execute payments with pre-simulated splits and receipts.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.15 }}
+            className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-4"
+          >
             <Link
               href="/dashboard"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-700/80 bg-slate-900/80 px-4 py-2 text-xs font-medium text-slate-200 shadow-[0_10px_30px_rgba(15,23,42,0.9)] transition hover:border-slate-500/80 hover:bg-slate-900"
+              className="inline-flex h-12 min-w-[200px] items-center justify-center gap-2 rounded-xl bg-white px-8 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/10 transition hover:bg-slate-100 hover:shadow-cyan-500/20"
             >
-              <WalletCards className="h-3.5 w-3.5 text-cyan-300" />
-              <span>Preview dashboard</span>
+              Open app
+              <ArrowRight className="h-4 w-4" />
             </Link>
-            <ConnectWalletButton size="sm" />
-          </div>
+            <ConnectWalletButton size="md" />
+          </motion.div>
 
-          <div className="flex flex-wrap gap-3 text-[11px] text-slate-400">
-            <span className="inline-flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Deterministic split simulation
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
-              Policy-enforced payouts
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
-              NFT receipts for every payment
-            </span>
-          </div>
-        </motion.div>
+          <motion.ul
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-slate-400"
+          >
+            {TRUST.map((t) => (
+              <li key={t} className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-cyan-500/80" />
+                {t}
+              </li>
+            ))}
+          </motion.ul>
+        </div>
 
+        {/* Product preview card */}
         <motion.div
-          className="mt-4 flex-1 md:mt-0"
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.2 }}
+          className="mx-auto mt-16 max-w-5xl"
         >
-          <div className="glass-panel relative h-full min-h-[220px] overflow-hidden p-4 md:min-h-[260px]">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.22),transparent_55%),radial-gradient(circle_at_bottom,_rgba(59,130,246,0.22),transparent_55%)]" />
-            <div className="relative flex h-full flex-col justify-between gap-4">
-              <div className="flex items-center justify-between text-xs text-slate-300">
-                <span className="rounded-full bg-slate-900/80 px-2 py-1 text-[10px] font-medium text-slate-200">
-                  Agent dashboard • Preview
-                </span>
-                <span className="text-[10px] text-slate-400">Polkadot Hub</span>
-              </div>
-
-              <div className="grid gap-3 md:grid-cols-2">
-                <div className="section-card space-y-2 bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-slate-950/80 p-3">
-                  <div className="flex items-center justify-between text-[11px] text-slate-300">
-                    <span className="font-medium">Agent status</span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-300">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                      Active
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400">vault-ai.agentpay.dot</p>
-                  <p className="mt-1 text-[11px] text-slate-300">
-                    Policies enforced on every transfer.
-                  </p>
-                </div>
-
-                <div className="section-card space-y-2 bg-slate-950/70 p-3">
-                  <div className="flex items-center justify-between text-[11px] text-slate-300">
-                    <span className="font-medium">Vault balance</span>
-                    <span className="text-[10px] text-slate-400">+4.2% APY</span>
-                  </div>
-                  <p className="text-lg font-semibold text-cyan-200">4,230.18 DOT</p>
-                  <p className="text-[11px] text-slate-400">Optimized across XCM routes</p>
+          <div className="overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-900/60 shadow-2xl shadow-black/40 backdrop-blur-sm sm:rounded-3xl">
+            <div className="flex items-center gap-2 border-b border-slate-800/80 bg-slate-950/80 px-4 py-3 sm:px-5">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+              <span className="ml-4 font-mono text-[11px] text-slate-500">
+                app.agentpay.io / dashboard
+              </span>
+            </div>
+            <div className="grid gap-px bg-slate-800/50 sm:grid-cols-12">
+              <div className="bg-slate-950/90 p-5 sm:col-span-4 sm:p-6">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Agent
+                </p>
+                <p className="mt-2 font-mono text-sm text-cyan-400">vault-ai.agentpay</p>
+                <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  Active
                 </div>
               </div>
-
-              <div className="section-card flex items-center justify-between bg-slate-950/60 p-3">
-                <div className="space-y-1">
-                  <p className="text-[11px] text-slate-400">Next payment</p>
-                  <p className="text-sm font-medium text-slate-50">12.5 DOT &bull; AgentOps</p>
-                  <p className="text-[11px] text-slate-400">
-                    70/20/10 split • Receipt NFT minted
-                  </p>
-                </div>
-                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-500 opacity-90 shadow-[0_18px_45px_rgba(8,47,73,0.8)]" />
+              <div className="bg-slate-950/70 p-5 sm:col-span-4 sm:p-6">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Vault
+                </p>
+                <p className="mt-2 text-2xl font-bold text-white">4,230.18</p>
+                <p className="text-xs text-slate-500">DOT · +4.2% yield</p>
+              </div>
+              <div className="bg-slate-950/70 p-5 sm:col-span-4 sm:p-6">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Next payment
+                </p>
+                <p className="mt-2 text-lg font-semibold text-white">12.5 DOT</p>
+                <p className="text-xs text-slate-500">70 / 20 / 10 split</p>
               </div>
             </div>
           </div>
@@ -131,4 +130,3 @@ export function LandingHero() {
     </section>
   );
 }
-
