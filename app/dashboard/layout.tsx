@@ -4,13 +4,12 @@ import { Topbar } from "@/components/shell/topbar";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-slate-950">
       <Sidebar />
-      <div className="flex min-h-screen flex-1 flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <Topbar />
-        <div className="page-grid pt-4">{children}</div>
+        <div className="site-container flex-1 py-8 md:py-10">{children}</div>
       </div>
     </div>
   );
 }
-
