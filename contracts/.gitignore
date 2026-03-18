@@ -28,6 +28,7 @@ cache
 typechain-types
 coverage
 coverage.json
+types/ethers-contracts
 
 # caches
 .eslintcache

@@ -2,8 +2,14 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ReceiptNFT is ERC721 {
+/// @title ReceiptNFT
+/// @notice Immutable payment receipt NFTs minted by SplitPayRouter
+/// @dev Only MINTER (SplitPayRouter) can mint
+contract ReceiptNFT is ERC721, Ownable {
+    address public minter;
+
     uint256 private _nextTokenId;
 
     struct Receipt {
@@ -15,14 +21,24 @@ contract ReceiptNFT is ERC721 {
 
     mapping(uint256 => Receipt) public receipts;
 
+    error ReceiptNFTUnauthorized();
+    error ReceiptNFTZeroAddress();
+
     event PaymentReceiptMinted(
         uint256 indexed tokenId,
         address indexed payer,
         address indexed service,
         uint256 amount
     );
+    event MinterUpdated(address indexed oldMinter, address indexed newMinter);
 
-    constructor() ERC721("AgentPay Receipt", "RECEIPT") {}
+    constructor() ERC721("AgentPay Receipt", "RECEIPT") Ownable(msg.sender) {}
+
+    function setMinter(address _minter) external onlyOwner {
+        if (_minter == address(0)) revert ReceiptNFTZeroAddress();
+        emit MinterUpdated(minter, _minter);
+        minter = _minter;
+    }
 
     function mintReceipt(
         address to,
@@ -30,6 +46,7 @@ contract ReceiptNFT is ERC721 {
         address service,
         uint256 amount
     ) external returns (uint256) {
+        if (msg.sender != minter) revert ReceiptNFTUnauthorized();
         _nextTokenId++;
         uint256 tokenId = _nextTokenId;
         _safeMint(to, tokenId);
