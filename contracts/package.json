@@ -1,10 +1,14 @@
 {
-  "name": "contracts",
-  "module": "index.ts",
+  "name": "agentpay-contracts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.ts",
+    "deploy:polkadot": "hardhat run scripts/deploy.ts --network polkadotHub"
+  },
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^7.0.0",
+    "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.3",
     "@types/bun": "latest",
     "hardhat": "^3.1.12"
   },
