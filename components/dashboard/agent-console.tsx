@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppStore } from "@/state/useAppStore";
 
 type AgentType = "payment" | "registration" | "treasury";
@@ -31,8 +31,14 @@ const PRESET_COMMANDS: Record<AgentType, string> = {
 };
 
 export function AgentConsole() {
-  const { setAgent, setVault, setAgentRunning, setVaultRunning, agent } =
-    useAppStore();
+  const {
+    setAgent,
+    setVault,
+    setAgentRunning,
+    setVaultRunning,
+    agent,
+    wallet,
+  } = useAppStore();
   const [agentType, setAgentType] = useState<AgentType>("payment");
   const [command, setCommand] = useState(PRESET_COMMANDS.payment);
   const [address, setAddress] = useState(
@@ -47,6 +53,34 @@ export function AgentConsole() {
     if (agentType === "treasury") return PRESET_COMMANDS.treasury;
     return "Registration uses address only.";
   }, [agentType]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function fetchStatus() {
+      const addr = wallet?.address;
+      if (!addr) return;
+      try {
+        const res = await fetch(`/api/agent/status?address=${addr}`);
+        const data = await res.json();
+        if (!mounted) return;
+        if (res.ok && data.ok) {
+          if (data.registered) {
+            setAgent({ id: addr, name: "Agent wallet", status: "active" });
+          }
+          if (data.totalAssets) {
+            setVault({ balance: Number(data.totalAssets) / 1e18 });
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch agent status:", e);
+      }
+    }
+
+    fetchStatus();
+    return () => {
+      mounted = false;
+    };
+  }, [wallet?.address, setAgent, setVault]);
 
   async function runAgent() {
     setIsRunning(true);
