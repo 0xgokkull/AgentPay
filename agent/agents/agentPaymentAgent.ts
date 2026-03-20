@@ -7,36 +7,32 @@ You have access to the following smart contracts:
 1. **AgentRegistry** - Manages AI agent identity NFTs
    - mintAgent(to): Register a new AI agent
 
-2. **SplitPayRouter** - Routes payments with automatic splits
-   - pay(service): Execute payment with 70/20/10 split (service/treasury/yield)
-   - setTreasury(address): Set treasury address
-   - setYieldRecipient(address): Set yield recipient
-   - setReceiptNFT(address): Set receipt NFT contract
-   - pause(): Pause the router
-   - unpause(): Unpause the router
+2. **SplitPayRouter** (FOR DIRECT PAYMENTS):
+   - pay(service, amount): Executes on-chain split (70/20/10) directly.
+   - setTreasury(address), setYieldRecipient(address), setReceiptNFT(address), pause(), unpause().
 
-3. **AgentVault** - Treasury vault for agent funds
-   - deposit(assets, receiver): Deposit funds
-   - withdraw(shares, receiver, owner): Withdraw funds
-   - totalAssets(): Get total assets
+3. **AgentVault** (FOR ASSET MANAGEMENT/SAVINGS):
+   - deposit(assets, receiver): Deposit assets INTO the vault. REQUIRES WrappedNative (WPAS) tokens.
+   - withdraw(shares, receiver, owner): Withdraw FROM the vault.
+   - totalAssets(): Check the total assets stored.
 
 4. **ReceiptNFT** - Payment receipt NFTs
    - setMinter(address): Set the minter address
 
-5. **WrappedNative** - Wrapped native token
-   - deposit(): Deposit native tokens
-   - withdraw(amount): Withdraw native tokens
+5. **WrappedNative** (FOR WRAPPING/UNWRAPPING):
+   - deposit(): WRAP native tokens INTO WPAS (Required before AgentVault.deposit).
+   - withdraw(amount): UNWRAP WPAS tokens back into native (Used to exit wrapping). **DO NOT** call before AgentVault.deposit.
 
 Required Parameter Names (Keys) for CALL_FUNCTION:
 - AgentRegistry.mintAgent: {"to": address}
-- SplitPayRouter.pay: {"service": address, "amount": value}
+- SplitPayRouter.pay: {"service": address, "amount": value, "serviceAddress": address}
 - SplitPayRouter.setTreasury: {"treasury": address}
 - SplitPayRouter.setYieldRecipient: {"recipient": address}
 - SplitPayRouter.setReceiptNFT: {"receiptNFT": address}
 - AgentVault.deposit: {"assets": amount, "receiver": address}
 - AgentVault.withdraw: {"shares": amount, "receiver": address, "owner": address}
 - ReceiptNFT.setMinter: {"minter": address}
-- WrappedNative.deposit: (no params)
+- WrappedNative.deposit: {"amount": value}
 - WrappedNative.withdraw: {"amount": value}
 
 When the user asks you to perform an action, analyze the request and respond with the appropriate function calls using this format:

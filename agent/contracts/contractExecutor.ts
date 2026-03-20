@@ -158,6 +158,25 @@ async function sendWrite(
     );
   }
 
+  const nonce = await publicClient.getTransactionCount({
+    address: account.address,
+  });
+
+  let maxPriorityFeePerGas = 2000000000n; // 2 Gwei default
+  let maxFeePerGas = 2500000000n; // 2.5 Gwei default
+
+  try {
+    const fees = await publicClient.estimateFeesPerGas();
+    if (fees.maxPriorityFeePerGas) {
+      maxPriorityFeePerGas = fees.maxPriorityFeePerGas + 1000000000n; // Buffer
+    }
+    if (fees.maxFeePerGas) {
+      maxFeePerGas = fees.maxFeePerGas + 2000000000n; // Buffer
+    }
+  } catch (feeErr) {
+    executionLogs.push(`[${new Date().toISOString()}] Warning: Fee estimation failed, using fallbacks. ${String(feeErr)}`);
+  }
+
   let hash: Hash;
 
   if (contractName === "AgentRegistry" && functionName === "mintAgent") {
@@ -168,6 +187,9 @@ async function sendWrite(
       abi: AGENT_REGISTRY_ABI,
       functionName: "mintAgent",
       args: [pickAddress(params, ["to", "agent", "address"])],
+      nonce,
+      maxPriorityFeePerGas,
+      maxFeePerGas,
     });
   } else if (contractName === "SplitPayRouter" && functionName === "pay") {
     const amount = pickAmount(
@@ -207,8 +229,19 @@ async function sendWrite(
       address: CONTRACT_ADDRESSES.SPLIT_PAY_ROUTER,
       abi: SPLIT_PAY_ROUTER_ABI,
       functionName: "pay",
-      args: [pickAddress(params, ["service", "to", "recipient", "payee"])],
+      args: [
+        pickAddress(params, [
+          "service",
+          "serviceAddress",
+          "to",
+          "recipient",
+          "payee",
+        ]),
+      ],
       value: amount,
+      nonce,
+      maxPriorityFeePerGas,
+      maxFeePerGas,
     });
   } else if (
     contractName === "SplitPayRouter" &&
@@ -221,6 +254,9 @@ async function sendWrite(
       abi: SPLIT_PAY_ROUTER_ABI,
       functionName: "setTreasury",
       args: [pickAddress(params, ["_treasury", "treasury", "address", "to"])],
+      nonce,
+      maxPriorityFeePerGas,
+      maxFeePerGas,
     });
   } else if (
     contractName === "SplitPayRouter" &&
@@ -242,6 +278,9 @@ async function sendWrite(
           "to",
         ]),
       ],
+      nonce,
+      maxPriorityFeePerGas,
+      maxFeePerGas,
     });
   } else if (
     contractName === "SplitPayRouter" &&
@@ -343,6 +382,9 @@ async function sendWrite(
       abi: AGENT_VAULT_ABI,
       functionName: "deposit",
       args: [amount, pickAddress(params, ["receiver", "to", "address"])],
+      nonce,
+      maxPriorityFeePerGas,
+      maxFeePerGas,
     });
   } else if (contractName === "AgentVault" && functionName === "withdraw") {
     hash = await walletClient.writeContract({
@@ -480,17 +522,24 @@ export async function executeContractFunction(
   functionName: string,
   params: Record<string, unknown>,
 ): Promise<ExecutionResult> {
-  const log = `[${new Date().toISOString()}] Executing ${contractName}.${functionName} with params: ${JSON.stringify(params)}`;
+  // Normalize contract names for AI robustness
+  let normalizedContract = contractName;
+  if (contractName === "Vault") normalizedContract = "AgentVault";
+  if (contractName === "Registry") normalizedContract = "AgentRegistry";
+  if (contractName === "Router") normalizedContract = "SplitPayRouter";
+  if (contractName === "NFT") normalizedContract = "ReceiptNFT";
+
+  const log = `[${new Date().toISOString()}] Executing ${normalizedContract}.${functionName} with params: ${JSON.stringify(params)}`;
   executionLogs.push(log);
 
   try {
     const isRead =
-      contractName === "AgentVault" && functionName === "totalAssets";
+      normalizedContract === "AgentVault" && functionName === "totalAssets";
     const result = isRead
-      ? await sendRead(contractName, functionName)
-      : await sendWrite(contractName, functionName, params);
+      ? await sendRead(normalizedContract, functionName)
+      : await sendWrite(normalizedContract, functionName, params);
     executionLogs.push(
-      `[${new Date().toISOString()}] SUCCESS ${contractName}.${functionName}`,
+      `[${new Date().toISOString()}] SUCCESS ${normalizedContract}.${functionName}`,
     );
     return result;
   } catch (error) {
