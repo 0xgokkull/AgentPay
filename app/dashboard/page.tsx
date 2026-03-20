@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Bot, WalletCards } from "lucide-react";
 import { useAppStore } from "@/state/useAppStore";
@@ -19,9 +19,10 @@ type ActionResult = {
 };
 
 export default function DashboardPage() {
-  const { wallet, agent, setAgent } = useAppStore();
+  const { wallet, agent, vault, setAgent, setVault } = useAppStore();
   const [isRegistering, setIsRegistering] = useState(false);
   const [isVaultRunning, setIsVaultRunning] = useState(false);
+  const [isStatusLoading, setIsStatusLoading] = useState(false);
   const [status, setStatus] = useState<string>("No actions yet.");
   const [logs, setLogs] = useState<string[]>([]);
 
@@ -90,6 +91,39 @@ export default function DashboardPage() {
     }
   }
 
+  useEffect(() => {
+    let mounted = true;
+    async function fetchStatus() {
+      const addr = wallet.address;
+      if (!addr) return;
+      setIsStatusLoading(true);
+      try {
+        const res = await fetch(`/api/agent/status?address=${addr}`);
+        const data = await res.json();
+        if (!mounted) return;
+        if (res.ok && data.ok) {
+          if (data.registered) {
+            setAgent({ id: addr, name: "Agent wallet", status: "active" });
+          }
+          if (data.totalAssets) {
+            setVault({ balance: Number(data.totalAssets) / 1e18 });
+          }
+        }
+      } catch (e) {
+        if (!mounted) return;
+        const message = e instanceof Error ? e.message : String(e);
+        setStatus(`Failed to fetch status: ${message}`);
+      } finally {
+        if (mounted) setIsStatusLoading(false);
+      }
+    }
+
+    fetchStatus();
+    return () => {
+      mounted = false;
+    };
+  }, [wallet.address, setAgent, setVault]);
+
   return (
     <div className="space-y-8">
       <div>
@@ -137,8 +171,17 @@ export default function DashboardPage() {
           </div>
           <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
             Vault
+            {isStatusLoading && (
+              <span className="ml-2 inline-block animate-pulse text-xs text-slate-400">
+                Checking...
+              </span>
+            )}
           </p>
-          <p className="mt-1 text-lg font-semibold text-white">— DOT</p>
+          <p className="mt-1 text-lg font-semibold text-white">
+            {vault && vault.balance > 0
+              ? `${vault.balance.toFixed(4)} ${vault.currency}`
+              : `— ${vault.currency}`}
+          </p>
           <button
             type="button"
             disabled={isVaultRunning}
