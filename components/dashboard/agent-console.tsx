@@ -31,8 +31,8 @@ const PRESET_COMMANDS: Record<AgentType, string> = {
 };
 
 export function AgentConsole() {
-  const { setAgent } = useAppStore();
-  const { setAgentRunning } = useAppStore();
+  const { setAgent, setVault, setAgentRunning, setVaultRunning } =
+    useAppStore();
   const [agentType, setAgentType] = useState<AgentType>("payment");
   const [command, setCommand] = useState(PRESET_COMMANDS.payment);
   const [address, setAddress] = useState(
@@ -50,7 +50,8 @@ export function AgentConsole() {
 
   async function runAgent() {
     setIsRunning(true);
-    setAgentRunning(true);
+    if (agentType === "registration") setAgentRunning(true);
+    if (agentType === "treasury") setVaultRunning(true);
     setError(null);
 
     try {
@@ -78,13 +79,38 @@ export function AgentConsole() {
       if (data.agentType === "registration" && data.ok) {
         setAgent({ id: address, name: "Agent wallet", status: "active" });
       }
+      // If treasury run returned vault total assets, update global vault
+      if (data.agentType === "treasury" && data.ok && data.executedActions) {
+        const vaultAction = data.executedActions.find(
+          (a) =>
+            a.contract?.toString().toLowerCase().includes("vault") &&
+            a.function?.toString().toLowerCase().includes("totalassets"),
+        );
+        if (vaultAction && vaultAction.result != null) {
+          try {
+            const raw = vaultAction.result as unknown;
+            const asNumber =
+              typeof raw === "number"
+                ? raw
+                : typeof raw === "string"
+                  ? Number(raw)
+                  : Number(String(raw));
+            if (!Number.isNaN(asNumber)) {
+              setVault({ balance: asNumber / 1e18, currency: "DOT" });
+            }
+          } catch (e) {
+            // ignore parse errors
+          }
+        }
+      }
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       setResult(null);
       setError(message);
     } finally {
       setIsRunning(false);
-      setAgentRunning(false);
+      if (agentType === "registration") setAgentRunning(false);
+      if (agentType === "treasury") setVaultRunning(false);
     }
   }
 

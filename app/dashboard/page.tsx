@@ -26,6 +26,7 @@ export default function DashboardPage() {
     setAgent,
     setVault,
     agentRunning,
+    vaultRunning,
     setAgentRunning,
     setVaultRunning,
   } = useAppStore();
@@ -96,6 +97,28 @@ export default function DashboardPage() {
       }
       setStatus("Vault action completed.");
       setLogs(data.logs || []);
+
+      const vaultAction = data.executedActions?.find(
+        (a) =>
+          a.contract?.toString().toLowerCase().includes("vault") &&
+          a.function?.toString().toLowerCase().includes("totalassets"),
+      );
+      if (vaultAction && vaultAction.result != null) {
+        try {
+          const raw = vaultAction.result as unknown;
+          const asNumber =
+            typeof raw === "number"
+              ? raw
+              : typeof raw === "string"
+                ? Number(raw)
+                : Number(String(raw));
+          if (!Number.isNaN(asNumber)) {
+            setVault({ balance: asNumber / 1e18 });
+          }
+        } catch (e) {
+          console.error("Failed to parse vault total assets result:", e);
+        }
+      }
     } catch (error) {
       setStatus(error instanceof Error ? error.message : String(error));
     } finally {
@@ -197,7 +220,7 @@ export default function DashboardPage() {
                 Checking...
               </span>
             )}
-            {isVaultRunning && (
+            {(isVaultRunning || vaultRunning) && (
               <span className="ml-2 inline-block animate-pulse text-xs text-slate-400">
                 Processing...
               </span>
@@ -210,7 +233,7 @@ export default function DashboardPage() {
           </p>
           <button
             type="button"
-            disabled={isVaultRunning}
+            disabled={isVaultRunning || vaultRunning}
             onClick={handleVault}
             className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-cyan-400 hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
           >
