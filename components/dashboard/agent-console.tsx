@@ -32,6 +32,7 @@ const PRESET_COMMANDS: Record<AgentType, string> = {
 
 export function AgentConsole() {
   const { setAgent } = useAppStore();
+  const { setAgentRunning } = useAppStore();
   const [agentType, setAgentType] = useState<AgentType>("payment");
   const [command, setCommand] = useState(PRESET_COMMANDS.payment);
   const [address, setAddress] = useState(
@@ -49,6 +50,7 @@ export function AgentConsole() {
 
   async function runAgent() {
     setIsRunning(true);
+    setAgentRunning(true);
     setError(null);
 
     try {
@@ -82,6 +84,7 @@ export function AgentConsole() {
       setError(message);
     } finally {
       setIsRunning(false);
+      setAgentRunning(false);
     }
   }
 
@@ -95,7 +98,16 @@ export function AgentConsole() {
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6">
-        <h2 className="text-lg font-semibold text-white">Agent Console</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white">Agent Console</h2>
+          {isRunning && (
+            <span className="ml-2 inline-block animate-pulse text-sm text-slate-400">
+              {agentType === "registration"
+                ? "Registering..."
+                : "Processing..."}
+            </span>
+          )}
+        </div>
         <p className="mt-2 text-sm text-slate-400">
           Run one agent at a time from the frontend and inspect called contract
           functions.

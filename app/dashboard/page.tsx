@@ -19,7 +19,17 @@ type ActionResult = {
 };
 
 export default function DashboardPage() {
-  const { wallet, agent, vault, setAgent, setVault } = useAppStore();
+  const {
+    wallet,
+    agent,
+    vault,
+    setAgent,
+    setVault,
+    agentRunning,
+    vaultRunning,
+    setAgentRunning,
+    setVaultRunning,
+  } = useAppStore();
   const [isRegistering, setIsRegistering] = useState(false);
   const [isVaultRunning, setIsVaultRunning] = useState(false);
   const [isStatusLoading, setIsStatusLoading] = useState(false);
@@ -33,6 +43,7 @@ export default function DashboardPage() {
 
   async function handleRegister() {
     setIsRegistering(true);
+    setAgentRunning(true);
     try {
       const res = await fetch("/api/agent/run", {
         method: "POST",
@@ -61,11 +72,13 @@ export default function DashboardPage() {
       setStatus(error instanceof Error ? error.message : String(error));
     } finally {
       setIsRegistering(false);
+      setAgentRunning(false);
     }
   }
 
   async function handleVault() {
     setIsVaultRunning(true);
+    setVaultRunning(true);
     try {
       const res = await fetch("/api/agent/run", {
         method: "POST",
@@ -88,6 +101,7 @@ export default function DashboardPage() {
       setStatus(error instanceof Error ? error.message : String(error));
     } finally {
       setIsVaultRunning(false);
+      setVaultRunning(false);
     }
   }
 
@@ -143,11 +157,19 @@ export default function DashboardPage() {
           </div>
           <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
             Agent
+            {(isRegistering || agentRunning || vaultRunning) && (
+              <span className="ml-2 inline-block animate-pulse text-xs text-slate-400">
+                Registering...
+              </span>
+            )}
           </p>
           <p className="mt-1 text-lg font-semibold text-white">
             {agent?.id
               ? `${agent.name ?? agent.id} — ${agent.status}`
               : "Not registered"}
+            {(isRegistering || agentRunning || vaultRunning) && (
+              <span className="ml-2 text-sm text-slate-400">(processing)</span>
+            )}
           </p>
           <Link
             href="/dashboard/agent"
@@ -174,6 +196,11 @@ export default function DashboardPage() {
             {isStatusLoading && (
               <span className="ml-2 inline-block animate-pulse text-xs text-slate-400">
                 Checking...
+              </span>
+            )}
+            {isVaultRunning && (
+              <span className="ml-2 inline-block animate-pulse text-xs text-slate-400">
+                Processing...
               </span>
             )}
           </p>
