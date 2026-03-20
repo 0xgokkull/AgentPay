@@ -5,16 +5,16 @@ import { privateKeyToAccount } from "viem/accounts";
 dotenv.config();
 
 // Polkadot Hub testnet configuration
-const RPC_URL = "https://testnet-passet-hub-eth-rpc.polkadot.io";
-const CHAIN_ID = 420420417;
+const RPC_URL = process.env.RPC_URL || "https://eth-rpc-testnet.polkadot.io";
+const CHAIN_ID = Number(process.env.CHAIN_ID || "420420417");
 
 // Contract addresses from .env
 const CONTRACTS = {
-  WRAPPED_NATIVE: "0x7832bf2C0EdeDc97C072D5e1F667c22838B06671",
-  AGENT_REGISTRY: "0x75cB78a83008D3Ac23aF6545E12d53776fe1e3fF",
-  AGENT_VAULT: "0xc3409d7b5Ae1eAf88C676Ec69cb36E2e448CE5ee",
-  SPLIT_PAY_ROUTER: "0x39F81a420F2B8E461812566Ef70327Cd508c85f7",
-  RECEIPT_NFT: "0x932Ec73B37735d6e62d5926a463dC67657413d63",
+  WRAPPED_NATIVE: "0xd3215799fB97296853BC07203c369e2611be55f3",
+  AGENT_REGISTRY: "0xd41B3eBDC73Dc92816e7B397726A9caF09319840",
+  AGENT_VAULT: "0xc9624F90c36357093AA96c689AaC423c16249C99",
+  SPLIT_PAY_ROUTER: "0x472e1f2F3a237Ea213D5144c945B6Cfc75190F6a",
+  RECEIPT_NFT: "0xC92D970130c0F54eE24Cf81Cc4cB74925a9022d8",
 };
 
 async function testBlockchainConnection() {
@@ -24,9 +24,9 @@ async function testBlockchainConnection() {
 
   try {
     // Get private key
-    const privateKey = process.env.Private_key;
+    const privateKey = process.env.PRIVATE_KEY || process.env.Private_key;
     if (!privateKey) {
-      throw new Error("Private_key not found in .env");
+      throw new Error("PRIVATE_KEY or Private_key not found in .env");
     }
 
     // Create account from private key

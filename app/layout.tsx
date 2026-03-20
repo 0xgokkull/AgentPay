@@ -24,6 +24,11 @@ export const metadata: Metadata = {
   },
   description:
     "Register AI agents, enforce spending policies, route yield across chains, and pay with deterministic splits and NFT receipts.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   openGraph: {
     title: "AgentPay",
     description: "Treasury and payments built around your agents.",
