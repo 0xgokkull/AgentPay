@@ -9,8 +9,18 @@ export const AGENT_REGISTRY_ABI = [
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "address", name: "agent", type: "address" },
-      { indexed: true, internalType: "uint256", name: "tokenId", type: "uint256" },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "agent",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
     ],
     name: "AgentRegistered",
     type: "event",
@@ -19,14 +29,21 @@ export const AGENT_REGISTRY_ABI = [
 
 export const AGENT_VAULT_ABI = [
   {
-    inputs: [{ internalType: "uint256", name: "assets", type: "uint256" }, { internalType: "address", name: "receiver", type: "address" }],
+    inputs: [
+      { internalType: "uint256", name: "assets", type: "uint256" },
+      { internalType: "address", name: "receiver", type: "address" },
+    ],
     name: "deposit",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    inputs: [{ internalType: "uint256", name: "shares", type: "uint256" }, { internalType: "address", name: "receiver", type: "address" }, { internalType: "address", name: "owner", type: "address" }],
+    inputs: [
+      { internalType: "uint256", name: "shares", type: "uint256" },
+      { internalType: "address", name: "receiver", type: "address" },
+      { internalType: "address", name: "owner", type: "address" },
+    ],
     name: "withdraw",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "nonpayable",
@@ -45,7 +62,9 @@ export const SPLIT_PAY_ROUTER_ABI = [
   {
     inputs: [{ internalType: "address", name: "service", type: "address" }],
     name: "pay",
-    outputs: [{ internalType: "uint256", name: "receiptTokenId", type: "uint256" }],
+    outputs: [
+      { internalType: "uint256", name: "receiptTokenId", type: "uint256" },
+    ],
     stateMutability: "payable",
     type: "function",
   },
@@ -110,5 +129,30 @@ export const WRAPPED_NATIVE_ABI = [
     stateMutability: "nonpayable",
     type: "function",
     inputs: [{ internalType: "uint256", name: "amount", type: "uint256" }],
+  },
+] as const;
+
+export const ERC20_ABI = [
+  {
+    constant: true,
+    inputs: [
+      { internalType: "address", name: "owner", type: "address" },
+      { internalType: "address", name: "spender", type: "address" },
+    ],
+    name: "allowance",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    constant: false,
+    inputs: [
+      { internalType: "address", name: "spender", type: "address" },
+      { internalType: "uint256", name: "amount", type: "uint256" },
+    ],
+    name: "approve",
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    stateMutability: "nonpayable",
+    type: "function",
   },
 ] as const;

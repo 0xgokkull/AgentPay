@@ -14,13 +14,15 @@ import {
   RECEIPT_NFT_ABI,
   SPLIT_PAY_ROUTER_ABI,
   WRAPPED_NATIVE_ABI,
+  ERC20_ABI,
 } from "./abis";
 
 dotenv.config();
 
 const executionLogs: string[] = [];
 
-const RPC_URL = process.env.RPC_URL || "https://testnet-passet-hub-eth-rpc.polkadot.io";
+const RPC_URL =
+  process.env.RPC_URL || "https://testnet-passet-hub-eth-rpc.polkadot.io";
 const CHAIN_ID = Number(process.env.CHAIN_ID || "420420417");
 
 const CHAIN = {
@@ -42,11 +44,26 @@ function envAddress(key: string, fallback: string): Address {
 }
 
 export const CONTRACT_ADDRESSES = {
-  WRAPPED_NATIVE: envAddress("WRAPPED_NATIVE_ADDRESS", "0x7832bf2C0EdeDc97C072D5e1F667c22838B06671"),
-  AGENT_REGISTRY: envAddress("AGENT_REGISTRY_ADDRESS", "0x75cB78a83008D3Ac23aF6545E12d53776fe1e3fF"),
-  AGENT_VAULT: envAddress("AGENT_VAULT_ADDRESS", "0xc3409d7b5Ae1eAf88C676Ec69cb36E2e448CE5ee"),
-  SPLIT_PAY_ROUTER: envAddress("SPLIT_PAY_ROUTER_ADDRESS", "0x39F81a420F2B8E461812566Ef70327Cd508c85f7"),
-  RECEIPT_NFT: envAddress("RECEIPT_NFT_ADDRESS", "0x932Ec73B37735d6e62d5926a463dC67657413d63"),
+  WRAPPED_NATIVE: envAddress(
+    "WRAPPED_NATIVE_ADDRESS",
+    "0x7832bf2C0EdeDc97C072D5e1F667c22838B06671",
+  ),
+  AGENT_REGISTRY: envAddress(
+    "AGENT_REGISTRY_ADDRESS",
+    "0x75cB78a83008D3Ac23aF6545E12d53776fe1e3fF",
+  ),
+  AGENT_VAULT: envAddress(
+    "AGENT_VAULT_ADDRESS",
+    "0xc3409d7b5Ae1eAf88C676Ec69cb36E2e448CE5ee",
+  ),
+  SPLIT_PAY_ROUTER: envAddress(
+    "SPLIT_PAY_ROUTER_ADDRESS",
+    "0x39F81a420F2B8E461812566Ef70327Cd508c85f7",
+  ),
+  RECEIPT_NFT: envAddress(
+    "RECEIPT_NFT_ADDRESS",
+    "0x932Ec73B37735d6e62d5926a463dC67657413d63",
+  ),
 };
 
 export interface ExecutionResult {
@@ -68,7 +85,7 @@ function normalizePrivateKey(): `0x${string}` | null {
 function pickAddress(
   params: Record<string, unknown>,
   keys: string[],
-  fallback?: Address
+  fallback?: Address,
 ): Address {
   for (const key of keys) {
     const value = params[key];
@@ -76,12 +93,20 @@ function pickAddress(
       return value as Address;
     }
   }
-  const foundValues = keys.map(k => `${k}: ${JSON.stringify(params[k])}`).join(", ");
+  const foundValues = keys
+    .map((k) => `${k}: ${JSON.stringify(params[k])}`)
+    .join(", ");
   if (fallback) return fallback;
-  throw new Error(`Invalid address in params. Found: { ${foundValues} }. Expected a valid 0x-prefixed 40-hex-character address for one of: ${keys.join(", ")}`);
+  throw new Error(
+    `Invalid address in params. Found: { ${foundValues} }. Expected a valid 0x-prefixed 40-hex-character address for one of: ${keys.join(", ")}`,
+  );
 }
 
-function pickAmount(params: Record<string, unknown>, keys: string[], fallback: bigint): bigint {
+function pickAmount(
+  params: Record<string, unknown>,
+  keys: string[],
+  fallback: bigint,
+): bigint {
   for (const key of keys) {
     const value = params[key];
     if (value !== undefined) {
@@ -106,7 +131,11 @@ function createClients() {
 
   const pk = normalizePrivateKey();
   if (!pk) {
-    return { publicClient, walletClient: null as ReturnType<typeof createWalletClient> | null, account: null as ReturnType<typeof privateKeyToAccount> | null };
+    return {
+      publicClient,
+      walletClient: null as ReturnType<typeof createWalletClient> | null,
+      account: null as ReturnType<typeof privateKeyToAccount> | null,
+    };
   }
 
   const account = privateKeyToAccount(pk);
@@ -122,11 +151,13 @@ function createClients() {
 async function sendWrite(
   contractName: string,
   functionName: string,
-  params: Record<string, unknown>
+  params: Record<string, unknown>,
 ): Promise<ExecutionResult> {
   const { publicClient, walletClient, account } = createClients();
   if (!walletClient || !account) {
-    throw new Error("PRIVATE_KEY (or Private_key) is required for write transactions");
+    throw new Error(
+      "PRIVATE_KEY (or Private_key) is required for write transactions",
+    );
   }
 
   let hash: Hash;
@@ -141,7 +172,11 @@ async function sendWrite(
       args: [pickAddress(params, ["to", "agent", "address"])],
     });
   } else if (contractName === "SplitPayRouter" && functionName === "pay") {
-    const amount = pickAmount(params, ["amount", "value"], 10_000_000_000_000_000n);
+    const amount = pickAmount(
+      params,
+      ["amount", "value"],
+      10_000_000_000_000_000n,
+    );
     const paused = await publicClient.readContract({
       address: CONTRACT_ADDRESSES.SPLIT_PAY_ROUTER,
       abi: [
@@ -179,7 +214,10 @@ async function sendWrite(
       args: [pickAddress(params, ["service", "to", "recipient", "payee"])],
       value: amount,
     });
-  } else if (contractName === "SplitPayRouter" && functionName === "setTreasury") {
+  } else if (
+    contractName === "SplitPayRouter" &&
+    functionName === "setTreasury"
+  ) {
     hash = await walletClient.writeContract({
       account,
       chain: CHAIN,
@@ -188,23 +226,44 @@ async function sendWrite(
       functionName: "setTreasury",
       args: [pickAddress(params, ["_treasury", "treasury", "address", "to"])],
     });
-  } else if (contractName === "SplitPayRouter" && functionName === "setYieldRecipient") {
+  } else if (
+    contractName === "SplitPayRouter" &&
+    functionName === "setYieldRecipient"
+  ) {
     hash = await walletClient.writeContract({
       account,
       chain: CHAIN,
       address: CONTRACT_ADDRESSES.SPLIT_PAY_ROUTER,
       abi: SPLIT_PAY_ROUTER_ABI,
       functionName: "setYieldRecipient",
-      args: [pickAddress(params, ["_recipient", "yield", "recipient", "yieldRecipient", "address", "to"])],
+      args: [
+        pickAddress(params, [
+          "_recipient",
+          "yield",
+          "recipient",
+          "yieldRecipient",
+          "address",
+          "to",
+        ]),
+      ],
     });
-  } else if (contractName === "SplitPayRouter" && functionName === "setReceiptNFT") {
+  } else if (
+    contractName === "SplitPayRouter" &&
+    functionName === "setReceiptNFT"
+  ) {
     hash = await walletClient.writeContract({
       account,
       chain: CHAIN,
       address: CONTRACT_ADDRESSES.SPLIT_PAY_ROUTER,
       abi: SPLIT_PAY_ROUTER_ABI,
       functionName: "setReceiptNFT",
-      args: [pickAddress(params, ["_receiptNFT", "receiptNFT", "addr", "to"], CONTRACT_ADDRESSES.RECEIPT_NFT)],
+      args: [
+        pickAddress(
+          params,
+          ["_receiptNFT", "receiptNFT", "addr", "to"],
+          CONTRACT_ADDRESSES.RECEIPT_NFT,
+        ),
+      ],
     });
   } else if (contractName === "SplitPayRouter" && functionName === "pause") {
     hash = await walletClient.writeContract({
@@ -225,16 +284,44 @@ async function sendWrite(
       args: [],
     });
   } else if (contractName === "AgentVault" && functionName === "deposit") {
+    const amount = toBigIntAmount(params.assets, "assets");
+    try {
+      const allowance = await publicClient.readContract({
+        address: CONTRACT_ADDRESSES.WRAPPED_NATIVE,
+        abi: ERC20_ABI,
+        functionName: "allowance",
+        args: [account.address, CONTRACT_ADDRESSES.AGENT_VAULT],
+      });
+
+      const allowanceBig =
+        typeof allowance === "bigint" ? allowance : BigInt(String(allowance));
+      if (allowanceBig < amount) {
+        const approveHash = await walletClient.writeContract({
+          account,
+          chain: CHAIN,
+          address: CONTRACT_ADDRESSES.WRAPPED_NATIVE,
+          abi: ERC20_ABI,
+          functionName: "approve",
+          args: [CONTRACT_ADDRESSES.AGENT_VAULT, amount],
+        });
+        await publicClient.waitForTransactionReceipt({ hash: approveHash });
+        const approveLog = `[${new Date().toISOString()}] Approved AgentVault to spend ${amount.toString()} of WRAPPED_NATIVE`;
+        executionLogs.push(approveLog);
+      }
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const warnLog = `[${new Date().toISOString()}] WARNING checking/setting allowance: ${errMsg}`;
+      console.warn(warnLog);
+      executionLogs.push(warnLog);
+    }
+
     hash = await walletClient.writeContract({
       account,
       chain: CHAIN,
       address: CONTRACT_ADDRESSES.AGENT_VAULT,
       abi: AGENT_VAULT_ABI,
       functionName: "deposit",
-      args: [
-        toBigIntAmount(params.assets, "assets"),
-        pickAddress(params, ["receiver", "to", "address"]),
-      ],
+      args: [amount, pickAddress(params, ["receiver", "to", "address"])],
     });
   } else if (contractName === "AgentVault" && functionName === "withdraw") {
     hash = await walletClient.writeContract({
@@ -256,10 +343,20 @@ async function sendWrite(
       address: CONTRACT_ADDRESSES.RECEIPT_NFT,
       abi: RECEIPT_NFT_ABI,
       functionName: "setMinter",
-      args: [pickAddress(params, ["_minter", "minter", "address", "to"], CONTRACT_ADDRESSES.SPLIT_PAY_ROUTER)],
+      args: [
+        pickAddress(
+          params,
+          ["_minter", "minter", "address", "to"],
+          CONTRACT_ADDRESSES.SPLIT_PAY_ROUTER,
+        ),
+      ],
     });
   } else if (contractName === "WrappedNative" && functionName === "deposit") {
-    const amount = pickAmount(params, ["amount", "value"], 10_000_000_000_000_000n);
+    const amount = pickAmount(
+      params,
+      ["amount", "value"],
+      10_000_000_000_000_000n,
+    );
     hash = await walletClient.writeContract({
       account,
       chain: CHAIN,
@@ -279,7 +376,9 @@ async function sendWrite(
       args: [toBigIntAmount(params.amount, "amount")],
     });
   } else {
-    throw new Error(`Unsupported write function: ${contractName}.${functionName}`);
+    throw new Error(
+      `Unsupported write function: ${contractName}.${functionName}`,
+    );
   }
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
@@ -327,7 +426,7 @@ async function sendWrite(
 
 async function sendRead(
   contractName: string,
-  functionName: string
+  functionName: string,
 ): Promise<ExecutionResult> {
   const { publicClient } = createClients();
 
@@ -351,18 +450,21 @@ async function sendRead(
 export async function executeContractFunction(
   contractName: string,
   functionName: string,
-  params: Record<string, unknown>
+  params: Record<string, unknown>,
 ): Promise<ExecutionResult> {
   const log = `[${new Date().toISOString()}] Executing ${contractName}.${functionName} with params: ${JSON.stringify(params)}`;
   console.log(log);
   executionLogs.push(log);
 
   try {
-    const isRead = contractName === "AgentVault" && functionName === "totalAssets";
+    const isRead =
+      contractName === "AgentVault" && functionName === "totalAssets";
     const result = isRead
       ? await sendRead(contractName, functionName)
       : await sendWrite(contractName, functionName, params);
-    executionLogs.push(`[${new Date().toISOString()}] SUCCESS ${contractName}.${functionName}`);
+    executionLogs.push(
+      `[${new Date().toISOString()}] SUCCESS ${contractName}.${functionName}`,
+    );
     return result;
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
