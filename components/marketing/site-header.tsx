@@ -23,9 +23,14 @@ export function SiteHeader() {
           className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-90"
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-sky-600 shadow-lg shadow-cyan-500/20">
-            <BadgeDollarSign className="h-5 w-5 text-slate-950" strokeWidth={2.25} />
+            <BadgeDollarSign
+              className="h-5 w-5 text-slate-950"
+              strokeWidth={2.25}
+            />
           </span>
-          <span className="text-lg font-bold tracking-tight text-white">AgentPay</span>
+          <span className="text-lg font-bold tracking-tight text-white">
+            AgentPay
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -41,12 +46,6 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          <Link
-            href="/connect"
-            className="text-sm font-medium text-slate-300 transition hover:text-white"
-          >
-            Sign in
-          </Link>
           <ConnectWalletButton size="sm" />
         </div>
 
@@ -80,13 +79,7 @@ export function SiteHeader() {
                   {item.label}
                 </Link>
               ))}
-              <Link
-                href="/connect"
-                className="rounded-lg px-3 py-3 text-base font-medium text-slate-300"
-                onClick={() => setOpen(false)}
-              >
-                Sign in
-              </Link>
+
               <div className="pt-2">
                 <ConnectWalletButton />
               </div>
