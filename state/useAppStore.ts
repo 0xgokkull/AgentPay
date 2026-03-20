@@ -22,13 +22,25 @@ type AppState = {
   wallet: WalletState;
   agent: AgentState;
   vault: VaultState;
+  agentRunning: boolean;
+  vaultRunning: boolean;
   setWallet: (wallet: Partial<WalletState>) => void;
   setAgent: (agent: Partial<AgentState>) => void;
   setVault: (vault: Partial<VaultState>) => void;
+  setAgentRunning: (v: boolean) => void;
+  setVaultRunning: (v: boolean) => void;
   reset: () => void;
 };
 
-const initialState: Omit<AppState, "setWallet" | "setAgent" | "setVault" | "reset"> = {
+const initialState: Omit<
+  AppState,
+  | "setWallet"
+  | "setAgent"
+  | "setVault"
+  | "setAgentRunning"
+  | "setVaultRunning"
+  | "reset"
+> = {
   wallet: {
     address: null,
     network: null,
@@ -44,6 +56,8 @@ const initialState: Omit<AppState, "setWallet" | "setAgent" | "setVault" | "rese
     currency: "DOT",
     yieldApr: 4.2,
   },
+  agentRunning: false,
+  vaultRunning: false,
 };
 
 export const useAppStore = create<AppState>((set) => ({
@@ -60,6 +74,9 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       vault: { ...state.vault, ...vault },
     })),
+  setAgentRunning: (v: boolean) =>
+    set((state) => ({ ...state, agentRunning: v })),
+  setVaultRunning: (v: boolean) =>
+    set((state) => ({ ...state, vaultRunning: v })),
   reset: () => set(initialState),
 }));
-
