@@ -31,7 +31,7 @@ const PRESET_COMMANDS: Record<AgentType, string> = {
 };
 
 export function AgentConsole() {
-  const { setAgent, setVault, setAgentRunning, setVaultRunning } =
+  const { setAgent, setVault, setAgentRunning, setVaultRunning, agent } =
     useAppStore();
   const [agentType, setAgentType] = useState<AgentType>("payment");
   const [command, setCommand] = useState(PRESET_COMMANDS.payment);
@@ -55,6 +55,11 @@ export function AgentConsole() {
     setError(null);
 
     try {
+      if (agentType === "payment" && !agent?.id) {
+        setResult(null);
+        setError("No agent registered. Register an agent first.");
+        return;
+      }
       const payload =
         agentType === "registration"
           ? { agentType, address }
@@ -213,7 +218,7 @@ export function AgentConsole() {
           <button
             type="button"
             onClick={runAgent}
-            disabled={isRunning}
+            disabled={isRunning || (agentType === "payment" && !agent?.id)}
             className="inline-flex items-center rounded-xl bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isRunning ? "Running..." : "Run Agent"}
