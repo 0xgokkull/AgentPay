@@ -26,7 +26,6 @@ export default function DashboardPage() {
     setAgent,
     setVault,
     agentRunning,
-    vaultRunning,
     setAgentRunning,
     setVaultRunning,
   } = useAppStore();
@@ -157,7 +156,7 @@ export default function DashboardPage() {
           </div>
           <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
             Agent
-            {(isRegistering || agentRunning || vaultRunning) && (
+            {(isRegistering || agentRunning) && (
               <span className="ml-2 inline-block animate-pulse text-xs text-slate-400">
                 Registering...
               </span>
@@ -167,7 +166,7 @@ export default function DashboardPage() {
             {agent?.id
               ? `${agent.name ?? agent.id} — ${agent.status}`
               : "Not registered"}
-            {(isRegistering || agentRunning || vaultRunning) && (
+            {(isRegistering || agentRunning) && (
               <span className="ml-2 text-sm text-slate-400">(processing)</span>
             )}
           </p>
