@@ -117,11 +117,11 @@ export const RECEIPT_NFT_ABI = [
 
 export const WRAPPED_NATIVE_ABI = [
   {
-    name: "deposit",
+    inputs: [{ internalType: "address", name: "account", type: "address" }],
+    name: "depositFor",
     outputs: [],
     stateMutability: "payable",
     type: "function",
-    inputs: [],
   },
   {
     name: "withdraw",

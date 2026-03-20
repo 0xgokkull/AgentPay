@@ -303,8 +303,8 @@ async function sendWrite(
             chain: CHAIN,
             address: CONTRACT_ADDRESSES.WRAPPED_NATIVE,
             abi: WRAPPED_NATIVE_ABI,
-            functionName: "deposit",
-            args: [],
+            functionName: "depositFor",
+            args: [account.address],
             value: amount,
           });
           await publicClient.waitForTransactionReceipt({ hash: wrapHash });
@@ -395,8 +395,8 @@ async function sendWrite(
       chain: CHAIN,
       address: CONTRACT_ADDRESSES.WRAPPED_NATIVE,
       abi: WRAPPED_NATIVE_ABI,
-      functionName: "deposit",
-      args: [],
+      functionName: "depositFor",
+      args: [account.address],
       value: amount,
     });
   } else if (contractName === "WrappedNative" && functionName === "withdraw") {
