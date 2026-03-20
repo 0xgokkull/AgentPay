@@ -1,6 +1,43 @@
+"use client";
+
+import { useEffect } from "react";
 import { AgentConsole } from "@/components/dashboard/agent-console";
+import { useAppStore } from "@/state/useAppStore";
 
 export default function AgentConsolePage() {
+  const { wallet, setAgent, setVault } = useAppStore();
+
+  useEffect(() => {
+    let mounted = true;
+    async function fetchStatus() {
+      const addr = wallet?.address;
+      const stored =
+        typeof window !== "undefined" ? localStorage.getItem("agent.id") : null;
+      const queryAddr = addr || stored;
+      if (!queryAddr) return;
+      try {
+        const res = await fetch(`/api/agent/status?address=${queryAddr}`);
+        const data = await res.json();
+        if (!mounted) return;
+        if (res.ok && data.ok) {
+          if (data.registered) {
+            setAgent({ id: queryAddr, name: "Agent wallet", status: "active" });
+          }
+          if (data.totalAssets) {
+            setVault({ balance: Number(data.totalAssets) / 1e18 });
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch agent status:", e);
+      }
+    }
+
+    fetchStatus();
+    return () => {
+      mounted = false;
+    };
+  }, [wallet?.address, setAgent, setVault]);
+
   return (
     <div className="space-y-6">
       <div>

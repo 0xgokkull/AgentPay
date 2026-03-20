@@ -94,6 +94,7 @@ export function AgentConsole() {
         setError("No agent registered. Register an agent first.");
         return;
       }
+
       const payload =
         agentType === "registration"
           ? { agentType, address }
@@ -117,29 +118,61 @@ export function AgentConsole() {
 
       if (data.agentType === "registration" && data.ok) {
         setAgent({ id: address, name: "Agent wallet", status: "active" });
+        try {
+          localStorage.setItem("agent.id", address);
+        } catch {}
       }
-      // If treasury run returned vault total assets, update global vault
+
       if (data.agentType === "treasury" && data.ok && data.executedActions) {
         const vaultAction = data.executedActions.find(
-          (a) =>
-            a.contract?.toString().toLowerCase().includes("vault") &&
+          (a: { function?: string }) =>
             a.function?.toString().toLowerCase().includes("totalassets"),
         );
+
         if (vaultAction && vaultAction.result != null) {
           try {
-            const raw = vaultAction.result as unknown;
+            const raw = vaultAction.result;
+
             const asNumber =
               typeof raw === "number"
                 ? raw
                 : typeof raw === "string"
                   ? Number(raw)
                   : Number(String(raw));
+
             if (!Number.isNaN(asNumber)) {
               setVault({ balance: asNumber / 1e18, currency: "DOT" });
             }
-          } catch (e) {
-            // ignore parse errors
+          } catch {
+            console.error(
+              "Failed to parse totalAssets result:",
+              vaultAction.result,
+            );
           }
+        }
+
+        try {
+          const stored =
+            typeof window !== "undefined"
+              ? localStorage.getItem("agent.id")
+              : null;
+
+          const queryAddr = stored || agent?.id;
+
+          if (queryAddr) {
+            const statusRes = await fetch(
+              `/api/agent/status?address=${queryAddr}`,
+            );
+            if (statusRes.ok) {
+              setAgent({
+                id: queryAddr,
+                name: "Agent wallet",
+                status: "active",
+              });
+            }
+          }
+        } catch {
+          console.error("Failed to refresh agent status after treasury run");
         }
       }
     } catch (e) {
@@ -152,7 +185,6 @@ export function AgentConsole() {
       if (agentType === "treasury") setVaultRunning(false);
     }
   }
-
   function onChangeAgent(next: AgentType) {
     setAgentType(next);
     setResult(null);
