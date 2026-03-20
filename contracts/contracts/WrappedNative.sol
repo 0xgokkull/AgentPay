@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
@@ -14,7 +14,10 @@ contract WrappedNative is ERC20 {
     event Deposit(address indexed account, uint256 amount);
     event Withdrawal(address indexed account, uint256 amount);
 
-    constructor(string memory name_, string memory symbol_) ERC20(name_, symbol_) {}
+    constructor(
+        string memory name_,
+        string memory symbol_
+    ) ERC20(name_, symbol_) {}
 
     /// @notice Deposit native token and mint wrapped tokens
     receive() external payable {
@@ -33,7 +36,8 @@ contract WrappedNative is ERC20 {
     /// @notice Withdraw wrapped tokens and receive native token
     function withdraw(uint256 amount) external {
         if (amount == 0) return;
-        if (balanceOf(msg.sender) < amount) revert WrappedNativeInsufficientBalance();
+        if (balanceOf(msg.sender) < amount)
+            revert WrappedNativeInsufficientBalance();
         _burn(msg.sender, amount);
         (bool success, ) = payable(msg.sender).call{value: amount}("");
         if (!success) revert WrappedNativeTransferFailed();

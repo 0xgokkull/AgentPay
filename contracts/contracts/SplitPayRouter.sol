@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IReceiptNFT {
-    function mintReceipt(address to, address payer, address service, uint256 amount) external returns (uint256);
+    function mintReceipt(
+        address to,
+        address payer,
+        address service,
+        uint256 amount
+    ) external returns (uint256);
 }
 
 /// @title SplitPayRouter
@@ -38,12 +43,22 @@ contract SplitPayRouter is ReentrancyGuard, Pausable, Ownable {
         uint256 receiptTokenId
     );
     event XCMTransferQueued(uint256 amount, uint32 targetParaId);
-    event TreasuryUpdated(address indexed oldTreasury, address indexed newTreasury);
-    event YieldRecipientUpdated(address indexed oldRecipient, address indexed newRecipient);
-    event ReceiptNFTUpdated(address indexed oldReceipt, address indexed newReceipt);
+    event TreasuryUpdated(
+        address indexed oldTreasury,
+        address indexed newTreasury
+    );
+    event YieldRecipientUpdated(
+        address indexed oldRecipient,
+        address indexed newRecipient
+    );
+    event ReceiptNFTUpdated(
+        address indexed oldReceipt,
+        address indexed newReceipt
+    );
 
-    constructor(address _treasury, address _xcmYieldRecipient) Ownable(msg.sender) {
-        if (_treasury == address(0) || _xcmYieldRecipient == address(0)) revert SplitPayRouterZeroAddress();
+    constructor(address _treasury, address _xcmYieldRecipient) Ownable() {
+        if (_treasury == address(0) || _xcmYieldRecipient == address(0))
+            revert SplitPayRouterZeroAddress();
         treasury = _treasury;
         xcmYieldRecipient = _xcmYieldRecipient;
     }
@@ -75,7 +90,15 @@ contract SplitPayRouter is ReentrancyGuard, Pausable, Ownable {
 
     /// @notice Execute payment with atomic split. Mints receipt NFT on success.
     /// @param service Recipient of 70% (service provider)
-    function pay(address service) external payable nonReentrant whenNotPaused returns (uint256 receiptTokenId) {
+    function pay(
+        address service
+    )
+        external
+        payable
+        nonReentrant
+        whenNotPaused
+        returns (uint256 receiptTokenId)
+    {
         uint256 amount = msg.value;
         if (amount == 0) revert SplitPayRouterZeroAmount();
         if (service == address(0)) revert SplitPayRouterZeroService();
@@ -94,10 +117,23 @@ contract SplitPayRouter is ReentrancyGuard, Pausable, Ownable {
 
         receiptTokenId = 0;
         if (address(receiptNFT) != address(0)) {
-            receiptTokenId = receiptNFT.mintReceipt(msg.sender, msg.sender, service, amount);
+            receiptTokenId = receiptNFT.mintReceipt(
+                msg.sender,
+                msg.sender,
+                service,
+                amount
+            );
         }
 
-        emit PaymentSplit(msg.sender, service, amount, serviceShare, yieldShare, treasuryShare, receiptTokenId);
+        emit PaymentSplit(
+            msg.sender,
+            service,
+            amount,
+            serviceShare,
+            yieldShare,
+            treasuryShare,
+            receiptTokenId
+        );
         return receiptTokenId;
     }
 

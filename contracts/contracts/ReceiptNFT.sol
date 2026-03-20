@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -32,7 +32,7 @@ contract ReceiptNFT is ERC721, Ownable {
     );
     event MinterUpdated(address indexed oldMinter, address indexed newMinter);
 
-    constructor() ERC721("AgentPay Receipt", "RECEIPT") Ownable(msg.sender) {}
+    constructor() ERC721("AgentPay Receipt", "RECEIPT") Ownable() {}
 
     function setMinter(address _minter) external onlyOwner {
         if (_minter == address(0)) revert ReceiptNFTZeroAddress();

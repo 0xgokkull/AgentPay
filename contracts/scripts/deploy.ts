@@ -14,7 +14,7 @@ async function main() {
   }
   const chainId = (await ethers.provider.getNetwork()).chainId;
 
-  const isTestnet = chainId === 420420417n;
+  const isTestnet = chainId === 420420417n || chainId === 420420421n;
   const wrappedConfig = isTestnet ? WRAPPED_NATIVE_TESTNET : WRAPPED_NATIVE_MAINNET;
 
   console.log("Deploying with account:", deployer.address);
