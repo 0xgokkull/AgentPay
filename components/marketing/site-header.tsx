@@ -34,10 +34,11 @@ export function SiteHeader() {
           href="/"
           className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-90"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-sky-600 shadow-lg shadow-cyan-500/20">
-            <BadgeDollarSign
-              className="h-5 w-5 text-slate-950"
-              strokeWidth={2.25}
+          <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-slate-900 border border-slate-800 shadow-lg shadow-cyan-500/10">
+            <img 
+              src="/brand/logo.png" 
+              alt="AgentPay Logo" 
+              className="h-full w-full object-cover" 
             />
           </span>
           <span className="text-lg font-bold tracking-tight text-white">
