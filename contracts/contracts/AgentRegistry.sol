@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -23,7 +23,9 @@ contract AgentRegistry is ERC721, AccessControl {
 
     /// @notice Register a new agent identity
     /// @param to Address to receive the soulbound token
-    function mintAgent(address to) external onlyRole(REGISTRAR_ROLE) returns (uint256) {
+    function mintAgent(
+        address to
+    ) external onlyRole(REGISTRAR_ROLE) returns (uint256) {
         _nextTokenId++;
         uint256 tokenId = _nextTokenId;
         _safeMint(to, tokenId);
@@ -31,17 +33,20 @@ contract AgentRegistry is ERC721, AccessControl {
         return tokenId;
     }
 
-    function _update(
+    function _beforeTokenTransfer(
+        address from,
         address to,
         uint256 tokenId,
-        address auth
-    ) internal virtual override returns (address) {
-        address from = _ownerOf(tokenId);
-        if (from != address(0) && to != address(0)) revert AgentRegistrySoulbound();
-        return super._update(to, tokenId, auth);
+        uint256 batchSize
+    ) internal virtual override {
+        if (from != address(0) && to != address(0))
+            revert AgentRegistrySoulbound();
+        super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721, AccessControl) returns (bool) {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC721, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }

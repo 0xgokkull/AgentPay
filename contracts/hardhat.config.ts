@@ -1,6 +1,13 @@
 import { defineConfig } from "hardhat/config";
 import hardhatToolboxMochaEthers from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
 
+const rpcUrl = process.env.RPC_URL || "https://westend-asset-hub-eth-rpc.polkadot.io";
+const chainId = Number(process.env.CHAIN_ID || "420420421");
+const rawPrivateKey = process.env.PRIVATE_KEY || process.env.Private_key;
+const account = rawPrivateKey
+  ? (rawPrivateKey.startsWith("0x") ? rawPrivateKey : `0x${rawPrivateKey}`)
+  : undefined;
+
 export default defineConfig({
   plugins: [hardhatToolboxMochaEthers],
   paths: {
@@ -10,9 +17,9 @@ export default defineConfig({
     artifacts: "./artifacts",
   },
   solidity: {
-    version: "0.8.24",
+    version: "0.8.19",
     settings: {
-      evmVersion: "cancun",
+      evmVersion: "london",
       optimizer: { enabled: true, runs: 200 },
     },
   },
@@ -23,9 +30,9 @@ export default defineConfig({
     },
     polkadotHub: {
       type: "http",
-      url: "https://testnet-passet-hub-eth-rpc.polkadot.io",
-      chainId: 420420417,
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      url: rpcUrl,
+      chainId,
+      accounts: account ? [account] : [],
     },
   },
 });

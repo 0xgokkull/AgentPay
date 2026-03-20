@@ -2,19 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BadgeDollarSign,
-  Bot,
-  CreditCard,
-  FileText,
-  Layers,
-  LayoutDashboard,
-  Settings,
-  ShieldCheck,
-  Waypoints,
-  Activity,
-  WalletCards,
-} from "lucide-react";
+import { BadgeDollarSign, Bot, LayoutDashboard } from "lucide-react";
 
 const GROUPS = [
   {
@@ -23,30 +11,7 @@ const GROUPS = [
   },
   {
     title: "Agent",
-    items: [
-      { href: "/dashboard/agent/register", label: "Register agent", icon: Bot },
-    ],
-  },
-  {
-    title: "Treasury",
-    items: [
-      { href: "/dashboard/vault", label: "Vault", icon: WalletCards },
-      { href: "/dashboard/pay", label: "Pay", icon: CreditCard },
-      { href: "/dashboard/receipt", label: "Receipts", icon: FileText },
-      { href: "/dashboard/policies", label: "Policies", icon: ShieldCheck },
-    ],
-  },
-  {
-    title: "Network",
-    items: [
-      { href: "/dashboard/services", label: "Services", icon: Layers },
-      { href: "/dashboard/xcm", label: "XCM", icon: Waypoints },
-      { href: "/dashboard/activity", label: "Activity", icon: Activity },
-    ],
-  },
-  {
-    title: "Account",
-    items: [{ href: "/dashboard/settings", label: "Settings", icon: Settings }],
+    items: [{ href: "/dashboard/agent", label: "Agent console", icon: Bot }],
   },
 ];
 
@@ -57,7 +22,10 @@ export function Sidebar() {
     <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-800/80 bg-slate-950/95 py-6 md:flex">
       <Link href="/" className="mb-8 flex items-center gap-2.5 px-5">
         <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-sky-600 shadow-md shadow-cyan-500/15">
-          <BadgeDollarSign className="h-5 w-5 text-slate-950" strokeWidth={2.25} />
+          <BadgeDollarSign
+            className="h-5 w-5 text-slate-950"
+            strokeWidth={2.25}
+          />
         </span>
         <div>
           <p className="text-sm font-bold text-white">AgentPay</p>
@@ -75,7 +43,8 @@ export function Sidebar() {
               {group.items.map((item) => {
                 const isActive =
                   pathname === item.href ||
-                  (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                  (item.href !== "/dashboard" &&
+                    pathname.startsWith(item.href));
                 const Icon = item.icon;
                 return (
                   <li key={item.href}>
