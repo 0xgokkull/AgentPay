@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { defineConfig } from "hardhat/config";
 import hardhatToolboxMochaEthers from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
 
@@ -23,7 +24,7 @@ export default defineConfig({
     },
     polkadotHub: {
       type: "http",
-      url: "https://testnet-passet-hub-eth-rpc.polkadot.io",
+      url: "https://eth-rpc-testnet.polkadot.io",
       chainId: 420420417,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },

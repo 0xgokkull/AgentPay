@@ -5,7 +5,13 @@ const WRAPPED_NATIVE_MAINNET = { name: "Wrapped DOT", symbol: "WDOT" };
 
 async function main() {
   const { ethers } = await network.connect();
-  const [deployer] = await ethers.getSigners();
+  const signers = await ethers.getSigners();
+  const deployer = signers[0];
+  if (!deployer) {
+    throw new Error(
+      "No deployer account. Set PRIVATE_KEY in .env for polkadotHub network."
+    );
+  }
   const chainId = (await ethers.provider.getNetwork()).chainId;
 
   const isTestnet = chainId === 420420417n;
