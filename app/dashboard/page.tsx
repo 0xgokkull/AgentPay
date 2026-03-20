@@ -18,9 +18,8 @@ type ActionResult = {
   error?: string;
 };
 
-
 export default function DashboardPage() {
-  const { wallet, setAgent } = useAppStore();
+  const { wallet, agent, setAgent } = useAppStore();
   const [isRegistering, setIsRegistering] = useState(false);
   const [isVaultRunning, setIsVaultRunning] = useState(false);
   const [status, setStatus] = useState<string>("No actions yet.");
@@ -91,7 +90,6 @@ export default function DashboardPage() {
     }
   }
 
-
   return (
     <div className="space-y-8">
       <div>
@@ -113,7 +111,9 @@ export default function DashboardPage() {
             Agent
           </p>
           <p className="mt-1 text-lg font-semibold text-white">
-            Not registered
+            {agent?.id
+              ? `${agent.name ?? agent.id} — ${agent.status}`
+              : "Not registered"}
           </p>
           <Link
             href="/dashboard/agent"
@@ -123,11 +123,12 @@ export default function DashboardPage() {
           </Link>
           <button
             type="button"
-            disabled={isRegistering}
+            disabled={isRegistering || !!agent?.id}
             onClick={handleRegister}
             className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-cyan-400 hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Register <ArrowRight className="h-4 w-4" />
+            {agent?.id ? "Registered" : "Register"}{" "}
+            <ArrowRight className="h-4 w-4" />
           </button>
         </div>
         <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6">

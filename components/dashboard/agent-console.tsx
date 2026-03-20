@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useAppStore } from "@/state/useAppStore";
 
 type AgentType = "payment" | "registration" | "treasury";
 
@@ -30,6 +31,7 @@ const PRESET_COMMANDS: Record<AgentType, string> = {
 };
 
 export function AgentConsole() {
+  const { setAgent } = useAppStore();
   const [agentType, setAgentType] = useState<AgentType>("payment");
   const [command, setCommand] = useState(PRESET_COMMANDS.payment);
   const [address, setAddress] = useState(
@@ -70,6 +72,10 @@ export function AgentConsole() {
       }
 
       setResult(data);
+
+      if (data.agentType === "registration" && data.ok) {
+        setAgent({ id: address, name: "Agent wallet", status: "active" });
+      }
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       setResult(null);
@@ -85,7 +91,6 @@ export function AgentConsole() {
     setError(null);
     setCommand(PRESET_COMMANDS[next]);
   }
-
 
   return (
     <div className="space-y-6">
@@ -254,7 +259,6 @@ export function AgentConsole() {
           </div>
         </div>
       ) : null}
-
     </div>
   );
 }
