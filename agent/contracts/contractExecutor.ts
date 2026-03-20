@@ -17,8 +17,6 @@ import {
   ERC20_ABI,
 } from "./abis";
 
-dotenv.config();
-
 const executionLogs: string[] = [];
 
 const RPC_URL =
@@ -192,8 +190,6 @@ async function sendWrite(
       args: [],
     });
 
-    // Agent responses often call pause() before pay(). If we own the router,
-    // auto-unpause so payment execution is resilient to that sequence.
     if (paused) {
       await walletClient.writeContract({
         account,
@@ -294,9 +290,6 @@ async function sendWrite(
         args: [account.address],
       });
 
-      const balanceBig =
-        typeof balance === "bigint" ? balance : BigInt(String(balance));
-
       const allowance = await publicClient.readContract({
         address: CONTRACT_ADDRESSES.WRAPPED_NATIVE,
         abi: ERC20_ABI,
@@ -306,19 +299,6 @@ async function sendWrite(
 
       const allowanceBig =
         typeof allowance === "bigint" ? allowance : BigInt(String(allowance));
-      if (allowanceBig < amount) {
-        const approveHash = await walletClient.writeContract({
-          account,
-          chain: CHAIN,
-          address: CONTRACT_ADDRESSES.WRAPPED_NATIVE,
-          abi: ERC20_ABI,
-          functionName: "approve",
-          args: [CONTRACT_ADDRESSES.AGENT_VAULT, amount],
-        });
-        await publicClient.waitForTransactionReceipt({ hash: approveHash });
-        const approveLog = `[${new Date().toISOString()}] Approved AgentVault to spend ${amount.toString()} of WRAPPED_NATIVE`;
-        executionLogs.push(approveLog);
-      }
       if (allowanceBig < amount) {
         try {
           if (allowanceBig > 0n) {
@@ -331,8 +311,7 @@ async function sendWrite(
               args: [CONTRACT_ADDRESSES.AGENT_VAULT, 0n],
             });
             await publicClient.waitForTransactionReceipt({ hash: resetHash });
-            const resetLog = `[${new Date().toISOString()}] Reset approval to 0 for AgentVault on WRAPPED_NATIVE`;
-            executionLogs.push(resetLog);
+            executionLogs.push(`[${new Date().toISOString()}] Reset approval to 0 for AgentVault on WRAPPED_NATIVE`);
           }
 
           const approveHash = await walletClient.writeContract({
@@ -344,27 +323,17 @@ async function sendWrite(
             args: [CONTRACT_ADDRESSES.AGENT_VAULT, amount],
           });
           await publicClient.waitForTransactionReceipt({ hash: approveHash });
-          const approveLog = `[${new Date().toISOString()}] Approved AgentVault to spend ${amount.toString()} of WRAPPED_NATIVE`;
-          executionLogs.push(approveLog);
+          executionLogs.push(`[${new Date().toISOString()}] Approved AgentVault to spend ${amount.toString()} of WRAPPED_NATIVE`);
         } catch (approveErr) {
-          const errMsg =
-            approveErr instanceof Error
-              ? approveErr.message
-              : String(approveErr);
-          const warnLog = `[${new Date().toISOString()}] WARNING approve/reset flow failed: ${errMsg}`;
-          console.warn(warnLog);
-          executionLogs.push(warnLog);
+          const errMsg = approveErr instanceof Error ? approveErr.message : String(approveErr);
+          executionLogs.push(`[${new Date().toISOString()}] WARNING approve/reset flow failed: ${errMsg}`);
         }
       } else {
-        const infoLog = `[${new Date().toISOString()}] Sufficient allowance already set for AgentVault to spend ${amount.toString()} of WRAPPED_NATIVE, skipping approve. Current allowance: ${allowanceBig.toString()}`;
-        console.info(infoLog);
-        executionLogs.push(infoLog);
+        executionLogs.push(`[${new Date().toISOString()}] Sufficient allowance already set for AgentVault to spend ${amount.toString()} of WRAPPED_NATIVE`);
       }
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : String(err);
-      const warnLog = `[${new Date().toISOString()}] WARNING preparing wrapped token/allowance: ${errMsg}`;
-      console.warn(warnLog);
-      executionLogs.push(warnLog);
+      executionLogs.push(`[${new Date().toISOString()}] WARNING preparing wrapped token/allowance: ${errMsg}`);
     }
 
     hash = await walletClient.writeContract({
@@ -463,7 +432,6 @@ async function sendWrite(
           }
         }
       } catch {
-        // Ignore unrelated logs while scanning for AgentRegistered.
       }
     }
   }
@@ -499,13 +467,20 @@ async function sendRead(
   throw new Error(`Unsupported read function: ${contractName}.${functionName}`);
 }
 
+export function clearExecutionLogs() {
+  executionLogs.length = 0;
+}
+
+export function getExecutionLogs() {
+  return [...executionLogs];
+}
+
 export async function executeContractFunction(
   contractName: string,
   functionName: string,
   params: Record<string, unknown>,
 ): Promise<ExecutionResult> {
   const log = `[${new Date().toISOString()}] Executing ${contractName}.${functionName} with params: ${JSON.stringify(params)}`;
-  console.log(log);
   executionLogs.push(log);
 
   try {
@@ -521,7 +496,6 @@ export async function executeContractFunction(
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     const failLog = `[${new Date().toISOString()}] ERROR ${contractName}.${functionName}: ${errorMsg}`;
-    console.error(failLog);
     executionLogs.push(failLog);
     return {
       success: false,
@@ -529,12 +503,4 @@ export async function executeContractFunction(
       log: failLog,
     };
   }
-}
-
-export function getExecutionLogs(): string[] {
-  return executionLogs;
-}
-
-export function clearExecutionLogs(): void {
-  executionLogs.length = 0;
 }

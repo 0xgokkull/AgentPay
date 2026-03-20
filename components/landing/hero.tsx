@@ -2,8 +2,11 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
+import { PageLoader } from "@/components/ui/page-loader";
 
 const TRUST = [
   "Pre-tx split simulation",
@@ -12,6 +15,16 @@ const TRUST = [
 ];
 
 export function LandingHero() {
+  const [isNavigating, setIsNavigating] = useState(false);
+  const router = useRouter();
+
+  const handleAppClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsNavigating(true);
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 1200);
+  };
   return (
     <section className="relative overflow-hidden pt-10 pb-16 sm:pt-14 sm:pb-24 lg:pt-16 lg:pb-28">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -57,13 +70,13 @@ export function LandingHero() {
             transition={{ duration: 0.45, delay: 0.15 }}
             className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-4"
           >
-            <Link
-              href="/dashboard"
-              className="inline-flex h-12 min-w-[200px] items-center justify-center gap-2 rounded-xl bg-white px-8 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/10 transition hover:bg-slate-100 hover:shadow-cyan-500/20"
+            <button
+              onClick={handleAppClick}
+              className="inline-flex h-12 min-w-[200px] items-center justify-center gap-2 rounded-xl bg-white px-8 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/10 transition hover:bg-slate-100 hover:shadow-cyan-500/20 cursor-pointer"
             >
               Open app
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </button>
             <ConnectWalletButton size="md" />
           </motion.div>
 
@@ -127,6 +140,7 @@ export function LandingHero() {
           </div>
         </motion.div>
       </div>
+      <PageLoader isVisible={isNavigating} />
     </section>
   );
 }

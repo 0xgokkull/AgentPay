@@ -44,9 +44,6 @@ CALL_FUNCTION(ContractName.functionName, {"param1": value1, "param2": value2})
 
 IMPORTANT: All addresses MUST be valid 40-character hexadecimal strings starting with "0x". NEVER use placeholders like "0x1234567890abcdef" or "0x ReceiptNFTContractAddress". If an address is unknown, ask the user for it instead of guessing.`;
 
-/**
- * AgentPayment Agent - Handles payment-related tasks
- */
 export class AgentPaymentAgent {
   private conversationHistory: AgentMessage[] = [];
 
@@ -59,20 +56,17 @@ export class AgentPaymentAgent {
       result: unknown;
     }>;
   }> {
-    // Get response from Groq
     const agentResponse = await executeAgentPrompt(
       SYSTEM_PROMPT,
       userCommand,
       this.conversationHistory
     );
 
-    // Add to conversation history
     this.conversationHistory.push(
       { role: "user", content: userCommand },
       { role: "assistant", content: agentResponse.content }
     );
 
-    // Execute any function calls identified in the response
     const executedActions = [];
 
     if (agentResponse.functionCalls && agentResponse.functionCalls.length > 0) {
@@ -112,9 +106,6 @@ export class AgentPaymentAgent {
   }
 }
 
-/**
- * AgentRegistry Agent - Handles agent registration
- */
 export class AgentRegistrationAgent {
   private conversationHistory: AgentMessage[] = [];
 
@@ -174,9 +165,6 @@ export class AgentRegistrationAgent {
   }
 }
 
-/**
- * TreasuryManagement Agent - Handles treasury operations
- */
 export class TreasuryManagementAgent {
   private conversationHistory: AgentMessage[] = [];
 

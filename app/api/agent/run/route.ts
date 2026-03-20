@@ -29,7 +29,6 @@ export async function POST(req: Request) {
     const agentType = body.agentType;
     const useLocalPlanner = body.useLocalPlanner ?? false;
 
-    // Keep frontend integration deterministic by default while still allowing real Groq mode.
     process.env.AGENT_FORCE_LOCAL = useLocalPlanner ? "true" : "false";
 
     if (!agentType) {

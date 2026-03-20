@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 5003",
+    "dev": "(lsof -ti:5003 | xargs kill -9 2>/dev/null || true) && next dev -p 5003",
     "build": "next build",
-    "start": "next start -p 5003",
+    "start": "(lsof -ti:5003 | xargs kill -9 2>/dev/null || true) && next start -p 5003",
     "lint": "eslint",
     "test:agent": "tsx agent.test.ts",
     "test:agent:watch": "tsx watch agent.test.ts"

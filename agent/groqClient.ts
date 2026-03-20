@@ -1,11 +1,8 @@
 import * as dotenv from "dotenv";
-
 dotenv.config();
-
 import Groq from "groq-sdk";
 
 const apiKey = process.env.groq;
-
 if (!apiKey) {
   throw new Error("GROQ_API_KEY not found in environment variables");
 }
@@ -29,9 +26,6 @@ export interface AgentResponse {
 
 type ParsedCall = { function: string; params: Record<string, unknown> };
 
-/**
- * Execute an agent prompt through Groq and extract function calls
- */
 export async function executeAgentPrompt(
   systemPrompt: string,
   userMessage: string,
@@ -57,7 +51,7 @@ export async function executeAgentPrompt(
   try {
     const response = await groqClient.chat.completions.create({
       model,
-      messages: messages as unknown as Groq.Chat.ChatCompletionMessageParam[],
+      messages: messages as any,
       temperature: 1,
       max_tokens: 1024,
     });
@@ -87,17 +81,11 @@ export async function executeAgentPrompt(
   }
 }
 
-/**
- * Parse function calls from Groq response
- */
 function parseFunctionCalls(
   content: string
 ): Array<{ function: string; params: Record<string, unknown> }> {
   const functionCalls: Array<{ function: string; params: Record<string, unknown> }> = [];
-
-  // Look for patterns like: CALL_FUNCTION(functionName, {params})
-  const functionPattern =
-    /CALL_FUNCTION\(([^,]+),\s*({[^}]+}|[^)]+)\)/g;
+  const functionPattern = /CALL_FUNCTION\(([^,]+),\s*({[^}]+}|[^)]+)\)/g;
   let match;
 
   while ((match = functionPattern.exec(content)) !== null) {
@@ -106,15 +94,13 @@ function parseFunctionCalls(
 
     if (functionName && paramsStr) {
       try {
-        // Robust parsing: wrap unquoted keys in double quotes for JSON.parse
         let formattedParams = paramsStr
-          .replace(/([{,])\s*([a-zA-Z0-9_$]+)\s*:/g, '$1"$2":') // Quote keys
-          .replace(/:\s*'([^']*)'/g, ':"$1"'); // Convert single quotes to double quotes
+          .replace(/([{,])\s*([a-zA-Z0-9_$]+)\s*:/g, '$1"$2":')
+          .replace(/:\s*'([^']*)'/g, ':"$1"');
         
         const params = JSON.parse(formattedParams);
         functionCalls.push({ function: functionName, params });
       } catch {
-        console.warn(`Failed to parse params for ${functionName}: ${paramsStr}`);
       }
     }
   }
@@ -125,14 +111,7 @@ function parseFunctionCalls(
 function buildLocalFunctionCalls(userMessage: string): ParsedCall[] {
   const text = userMessage.toLowerCase();
   const addresses = userMessage.match(/0x[a-fA-F0-9]{40}/g) || [];
-  
-  // To avoid catching digits inside addresses, remove addresses from the text before searching for amounts
-  let textForNumbers = userMessage;
-  addresses.forEach(addr => {
-    textForNumbers = textForNumbers.replace(addr, "");
-  });
-  
-  const numeric = textForNumbers.match(/\d+/g) || [];
+  const numeric = userMessage.match(/\d+/g) || [];
   const amount = numeric.length > 0 ? numeric[0] : "1000000000000000000";
 
   const calls: ParsedCall[] = [];
@@ -171,7 +150,7 @@ function buildLocalFunctionCalls(userMessage: string): ParsedCall[] {
   if (text.includes("set receipt")) {
     calls.push({
       function: "SplitPayRouter.setReceiptNFT",
-      params: { _receiptNFT: addresses[0] || "0x5555555555555555555555555555555555555555" },
+      params: { _recipient: addresses[0] || "0x5555555555555555555555555555555555555555" },
     });
   }
 

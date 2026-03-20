@@ -1,5 +1,7 @@
 import { create } from "zustand";
 
+export const EXPLORER_URL = "https://blockscout-testnet.polkadot.io/tx/";
+
 export type WalletState = {
   address: string | null;
   network: string | null;
@@ -18,29 +20,49 @@ export type VaultState = {
   yieldApr: number;
 };
 
+export type AgentType = "payment" | "registration" | "treasury";
+
+export type ExecutedAction = {
+  contract: string;
+  function: string;
+  params: Record<string, unknown>;
+  result: unknown;
+  transactionHash?: string;
+};
+
+export type ApiResult = {
+  ok: boolean;
+  agentType: AgentType;
+  response: string;
+  executedActions: ExecutedAction[];
+  logs: string[];
+  error?: string;
+};
+
+export type ExecutionState = {
+  status: "idle" | "running" | "success" | "error";
+  agentType: AgentType | null;
+  result: ApiResult | null;
+  error: string | null;
+};
+
 type AppState = {
   wallet: WalletState;
   agent: AgentState;
   vault: VaultState;
-  agentRunning: boolean;
-  vaultRunning: boolean;
+  execution: ExecutionState;
   setWallet: (wallet: Partial<WalletState>) => void;
   setAgent: (agent: Partial<AgentState>) => void;
   setVault: (vault: Partial<VaultState>) => void;
-  setAgentRunning: (v: boolean) => void;
-  setVaultRunning: (v: boolean) => void;
+  setExecution: (execution: Partial<ExecutionState>) => void;
+  startExecution: (agentType: AgentType) => void;
+  finishExecution: (result: ApiResult) => void;
+  failExecution: (error: string) => void;
+  resetExecution: () => void;
   reset: () => void;
 };
 
-const initialState: Omit<
-  AppState,
-  | "setWallet"
-  | "setAgent"
-  | "setVault"
-  | "setAgentRunning"
-  | "setVaultRunning"
-  | "reset"
-> = {
+const initialState: Omit<AppState, "setWallet" | "setAgent" | "setVault" | "setExecution" | "startExecution" | "finishExecution" | "failExecution" | "resetExecution" | "reset"> = {
   wallet: {
     address: null,
     network: null,
@@ -56,8 +78,12 @@ const initialState: Omit<
     currency: "DOT",
     yieldApr: 4.2,
   },
-  agentRunning: false,
-  vaultRunning: false,
+  execution: {
+    status: "idle",
+    agentType: null,
+    result: null,
+    error: null,
+  },
 };
 
 export const useAppStore = create<AppState>((set) => ({
@@ -74,9 +100,39 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       vault: { ...state.vault, ...vault },
     })),
-  setAgentRunning: (v: boolean) =>
-    set((state) => ({ ...state, agentRunning: v })),
-  setVaultRunning: (v: boolean) =>
-    set((state) => ({ ...state, vaultRunning: v })),
+  setExecution: (execution) =>
+    set((state) => ({
+      execution: { ...state.execution, ...execution },
+    })),
+  startExecution: (agentType) =>
+    set({
+      execution: {
+        status: "running",
+        agentType,
+        result: null,
+        error: null,
+      },
+    }),
+  finishExecution: (result) =>
+    set({
+      execution: {
+        status: "success",
+        agentType: result.agentType,
+        result,
+        error: null,
+      },
+    }),
+  failExecution: (error) =>
+    set((state) => ({
+      execution: {
+        ...state.execution,
+        status: "error",
+        error,
+      },
+    })),
+  resetExecution: () =>
+    set({
+      execution: initialState.execution,
+    }),
   reset: () => set(initialState),
 }));
