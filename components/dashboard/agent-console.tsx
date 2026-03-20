@@ -118,9 +118,6 @@ export function AgentConsole() {
 
       if (data.agentType === "registration" && data.ok) {
         setAgent({ id: address, name: "Agent wallet", status: "active" });
-        try {
-          localStorage.setItem("agent.id", address);
-        } catch {}
       }
 
       if (data.agentType === "treasury" && data.ok && data.executedActions) {
@@ -152,18 +149,13 @@ export function AgentConsole() {
         }
 
         try {
-          const stored =
-            typeof window !== "undefined"
-              ? localStorage.getItem("agent.id")
-              : null;
-
-          const queryAddr = stored || agent?.id;
-
+          const queryAddr = wallet?.address || agent?.id;
           if (queryAddr) {
             const statusRes = await fetch(
               `/api/agent/status?address=${queryAddr}`,
             );
-            if (statusRes.ok) {
+            const statusData = await statusRes.json();
+            if (statusRes.ok && statusData.ok && statusData.registered) {
               setAgent({
                 id: queryAddr,
                 name: "Agent wallet",
@@ -171,8 +163,11 @@ export function AgentConsole() {
               });
             }
           }
-        } catch {
-          console.error("Failed to refresh agent status after treasury run");
+        } catch (err) {
+          console.error(
+            "Failed to refresh agent status after treasury run",
+            err,
+          );
         }
       }
     } catch (e) {
@@ -224,12 +219,12 @@ export function AgentConsole() {
           </button>
           <button
             type="button"
-            onClick={() => onChangeAgent("registration")}
             className={`rounded-xl border px-3 py-2 text-sm font-medium transition ${
               agentType === "registration"
                 ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-300"
                 : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-600"
             }`}
+            onClick={() => onChangeAgent("registration")}
           >
             Registration Agent
           </button>

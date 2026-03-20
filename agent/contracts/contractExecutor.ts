@@ -296,28 +296,6 @@ async function sendWrite(
 
       const balanceBig =
         typeof balance === "bigint" ? balance : BigInt(String(balance));
-      if (balanceBig < amount) {
-        try {
-          const wrapHash = await walletClient.writeContract({
-            account,
-            chain: CHAIN,
-            address: CONTRACT_ADDRESSES.WRAPPED_NATIVE,
-            abi: WRAPPED_NATIVE_ABI,
-            functionName: "depositFor",
-            args: [account.address],
-            value: amount,
-          });
-          await publicClient.waitForTransactionReceipt({ hash: wrapHash });
-          const wrapLog = `[${new Date().toISOString()}] Wrapped native: deposit tx ${wrapHash} for ${amount.toString()}`;
-          executionLogs.push(wrapLog);
-        } catch (wrapErr) {
-          const errMsg =
-            wrapErr instanceof Error ? wrapErr.message : String(wrapErr);
-          const warnLog = `[${new Date().toISOString()}] WARNING wrapping native: ${errMsg}`;
-          console.warn(warnLog);
-          executionLogs.push(warnLog);
-        }
-      }
 
       const allowance = await publicClient.readContract({
         address: CONTRACT_ADDRESSES.WRAPPED_NATIVE,
@@ -340,6 +318,47 @@ async function sendWrite(
         await publicClient.waitForTransactionReceipt({ hash: approveHash });
         const approveLog = `[${new Date().toISOString()}] Approved AgentVault to spend ${amount.toString()} of WRAPPED_NATIVE`;
         executionLogs.push(approveLog);
+      }
+      if (allowanceBig < amount) {
+        try {
+          if (allowanceBig > 0n) {
+            const resetHash = await walletClient.writeContract({
+              account,
+              chain: CHAIN,
+              address: CONTRACT_ADDRESSES.WRAPPED_NATIVE,
+              abi: ERC20_ABI,
+              functionName: "approve",
+              args: [CONTRACT_ADDRESSES.AGENT_VAULT, 0n],
+            });
+            await publicClient.waitForTransactionReceipt({ hash: resetHash });
+            const resetLog = `[${new Date().toISOString()}] Reset approval to 0 for AgentVault on WRAPPED_NATIVE`;
+            executionLogs.push(resetLog);
+          }
+
+          const approveHash = await walletClient.writeContract({
+            account,
+            chain: CHAIN,
+            address: CONTRACT_ADDRESSES.WRAPPED_NATIVE,
+            abi: ERC20_ABI,
+            functionName: "approve",
+            args: [CONTRACT_ADDRESSES.AGENT_VAULT, amount],
+          });
+          await publicClient.waitForTransactionReceipt({ hash: approveHash });
+          const approveLog = `[${new Date().toISOString()}] Approved AgentVault to spend ${amount.toString()} of WRAPPED_NATIVE`;
+          executionLogs.push(approveLog);
+        } catch (approveErr) {
+          const errMsg =
+            approveErr instanceof Error
+              ? approveErr.message
+              : String(approveErr);
+          const warnLog = `[${new Date().toISOString()}] WARNING approve/reset flow failed: ${errMsg}`;
+          console.warn(warnLog);
+          executionLogs.push(warnLog);
+        }
+      } else {
+        const infoLog = `[${new Date().toISOString()}] Sufficient allowance already set for AgentVault to spend ${amount.toString()} of WRAPPED_NATIVE, skipping approve. Current allowance: ${allowanceBig.toString()}`;
+        console.info(infoLog);
+        executionLogs.push(infoLog);
       }
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : String(err);

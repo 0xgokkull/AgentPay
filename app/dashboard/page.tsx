@@ -66,9 +66,6 @@ export default function DashboardPage() {
         name: "Agent wallet",
         status: "active",
       });
-      try {
-        localStorage.setItem("agent.id", connectedAddress);
-      } catch {}
       setStatus("Agent registered successfully.");
       setLogs(data.logs || []);
     } catch (error) {
@@ -134,18 +131,15 @@ export default function DashboardPage() {
     let mounted = true;
     async function fetchStatus() {
       const addr = wallet.address;
-      const stored =
-        typeof window !== "undefined" ? localStorage.getItem("agent.id") : null;
-      const queryAddr = addr || stored;
-      if (!queryAddr) return;
+      if (!addr) return;
       setIsStatusLoading(true);
       try {
-        const res = await fetch(`/api/agent/status?address=${queryAddr}`);
+        const res = await fetch(`/api/agent/status?address=${addr}`);
         const data = await res.json();
         if (!mounted) return;
         if (res.ok && data.ok) {
           if (data.registered) {
-            setAgent({ id: queryAddr, name: "Agent wallet", status: "active" });
+            setAgent({ id: addr, name: "Agent wallet", status: "active" });
           }
           if (data.totalAssets) {
             setVault({ balance: Number(data.totalAssets) / 1e18 });
