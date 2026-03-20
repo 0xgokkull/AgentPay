@@ -285,7 +285,40 @@ async function sendWrite(
     });
   } else if (contractName === "AgentVault" && functionName === "deposit") {
     const amount = toBigIntAmount(params.assets, "assets");
+
     try {
+      const balance = await publicClient.readContract({
+        address: CONTRACT_ADDRESSES.WRAPPED_NATIVE,
+        abi: ERC20_ABI,
+        functionName: "balanceOf",
+        args: [account.address],
+      });
+
+      const balanceBig =
+        typeof balance === "bigint" ? balance : BigInt(String(balance));
+      if (balanceBig < amount) {
+        try {
+          const wrapHash = await walletClient.writeContract({
+            account,
+            chain: CHAIN,
+            address: CONTRACT_ADDRESSES.WRAPPED_NATIVE,
+            abi: WRAPPED_NATIVE_ABI,
+            functionName: "deposit",
+            args: [],
+            value: amount,
+          });
+          await publicClient.waitForTransactionReceipt({ hash: wrapHash });
+          const wrapLog = `[${new Date().toISOString()}] Wrapped native: deposit tx ${wrapHash} for ${amount.toString()}`;
+          executionLogs.push(wrapLog);
+        } catch (wrapErr) {
+          const errMsg =
+            wrapErr instanceof Error ? wrapErr.message : String(wrapErr);
+          const warnLog = `[${new Date().toISOString()}] WARNING wrapping native: ${errMsg}`;
+          console.warn(warnLog);
+          executionLogs.push(warnLog);
+        }
+      }
+
       const allowance = await publicClient.readContract({
         address: CONTRACT_ADDRESSES.WRAPPED_NATIVE,
         abi: ERC20_ABI,
@@ -310,7 +343,7 @@ async function sendWrite(
       }
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : String(err);
-      const warnLog = `[${new Date().toISOString()}] WARNING checking/setting allowance: ${errMsg}`;
+      const warnLog = `[${new Date().toISOString()}] WARNING preparing wrapped token/allowance: ${errMsg}`;
       console.warn(warnLog);
       executionLogs.push(warnLog);
     }
